@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+from urllib.parse import urlparse, unquote
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -34,6 +35,29 @@ def env_bool(name: str, default: bool = False) -> bool:
 
 def env_list(name: str, default: str = '') -> list[str]:
     return [value.strip() for value in os.getenv(name, default).split(',') if value.strip()]
+
+
+def database_config() -> dict[str, str]:
+    database_url = os.getenv('DATABASE_URL', '').strip()
+    if database_url:
+        parsed = urlparse(database_url)
+        return {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': unquote(parsed.path.lstrip('/')),
+            'USER': unquote(parsed.username or ''),
+            'PASSWORD': unquote(parsed.password or ''),
+            'HOST': parsed.hostname or '',
+            'PORT': str(parsed.port or 5432),
+        }
+
+    return {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'GesPro'),
+        'USER': os.getenv('POSTGRES_USER', 'gespro_user'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', '12345'),
+        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+    }
 
 
 DEBUG = env_bool('DEBUG', False)
@@ -96,14 +120,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'gespro_config.wsgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'GesPro'),
-        'USER': os.getenv('POSTGRES_USER', 'gespro_user'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', '12345'),
-        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
-    }
+    'default': database_config()
 }
 
 AUTH_PASSWORD_VALIDATORS = [
