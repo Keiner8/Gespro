@@ -36,7 +36,7 @@ def env_list(name: str, default: str = '') -> list[str]:
     return [value.strip() for value in os.getenv(name, default).split(',') if value.strip()]
 
 
-DEBUG = env_bool('DEBUG', True)
+DEBUG = env_bool('DEBUG', False)
 SECRET_KEY = os.getenv('SECRET_KEY', 'gespro-django-puro-dev-key' if DEBUG else '')
 if not DEBUG and not SECRET_KEY:
     raise ImproperlyConfigured('SECRET_KEY debe estar configurada en produccion.')
