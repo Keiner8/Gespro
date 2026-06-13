@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Administrador | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-admin">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Panel del Administrador</h1>
+            </div>
+            <div class="btn-row">
+                <a class="btn" href="{% url 'dashboards:reportes_home' %}">Ver reportes</a>
+                <a class="btn-secondary" href="{% url 'assistant:home' %}">Abrir asistente</a>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card"><span class="stat-label">Usuarios</span><strong class="stat-value">{{ total_usuarios }}</strong></div>
+            <div class="stat-card"><span class="stat-label">Fichas</span><strong class="stat-value">{{ total_fichas }}</strong></div>
+            <div class="stat-card"><span class="stat-label">Trimestres</span><strong class="stat-value">{{ total_trimestres }}</strong></div>
+            <div class="stat-card"><span class="stat-label">Aprendices</span><strong class="stat-value">{{ total_aprendices }}</strong></div>
+        </div>
+        <div class="dashboard-highlight-grid">
+            <article class="dashboard-highlight role-admin-accent">
+                <span class="dashboard-highlight-label">Usuarios activos</span>
+                <strong>{{ usuarios_activos }}</strong>
+                <p>{{ usuarios_inactivos }} cuentas estan inactivas y listas para seguimiento.</p>
+            </article>
+            <article class="dashboard-highlight role-admin-accent">
+                <span class="dashboard-highlight-label">Rol dominante</span>
+                <strong>{{ admin_highlight|title }}</strong>
+                <p>La mayor concentracion actual de cuentas se agrupa en ese perfil.</p>
+            </article>
+            <article class="dashboard-highlight role-admin-accent">
+                <span class="dashboard-highlight-label">Instructores</span>
+                <strong>{{ total_instructores }}</strong>
+                <p>Instructores registrados y disponibles para la asignacion de fichas.</p>
+            </article>
+        </div>
+        <div class="chart-grid chart-grid-admin">
+            <div class="chart-panel">
+                <h2 class="chart-title">Resumen general de modulos</h2>
+                <div class="chart-canvas-wrap">
+                    <canvas id="adminOverviewChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-panel">
+                <h2 class="chart-title">Distribucion de roles</h2>
+                <div class="chart-canvas-wrap">
+                    <canvas id="adminRolesChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-panel chart-panel-wide">
+                <h2 class="chart-title">Estado de trimestres</h2>
+                <div class="chart-canvas-wrap">
+                    <canvas id="adminFlowChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-panel chart-panel-wide">
+                <h2 class="chart-title">Estructura academica base</h2>
+                <div class="chart-canvas-wrap">
+                    <canvas id="adminAcademicChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const adminOverviewCtx = document.getElementById('adminOverviewChart');
+new Chart(adminOverviewCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Usuarios', 'Fichas', 'Trimestres', 'Aprendices', 'Instructores'],
+    datasets: [{
+      label: 'Totales',
+      data: [{{ total_usuarios }}, {{ total_fichas }}, {{ total_trimestres }}, {{ total_aprendices }}, {{ total_instructores }}],
+      backgroundColor: ['#2563eb', '#db2777', '#8b5cf6', '#16a34a', '#0ea5e9']
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  }
+});
+
+const adminRolesCtx = document.getElementById('adminRolesChart');
+new Chart(adminRolesCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Administradores', 'Instructores', 'Aprendices'],
+    datasets: [{
+      data: [{{ role_counts.administradores }}, {{ role_counts.instructores }}, {{ role_counts.aprendices }}],
+      backgroundColor: ['#1d4ed8', '#0ea5e9', '#8b5cf6'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom'
+      }
+    }
+  }
+});
+
+const adminFlowCtx = document.getElementById('adminFlowChart');
+new Chart(adminFlowCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Activos', 'Finalizados', 'Pendientes'],
+    datasets: [{
+      label: 'Estado',
+      data: [
+        {{ trimestre_counts.activo }},
+        {{ trimestre_counts.finalizado }},
+        {{ trimestre_counts.pendiente }}
+      ],
+      backgroundColor: ['#8b5cf6', '#f59e0b', '#94a3b8']
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  }
+});
+
+const adminAcademicCtx = document.getElementById('adminAcademicChart');
+new Chart(adminAcademicCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Fichas', 'Trimestres', 'Aprendices', 'Instructores'],
+    datasets: [{
+      data: [{{ total_fichas }}, {{ total_trimestres }}, {{ total_aprendices }}, {{ total_instructores }}],
+      backgroundColor: ['#2563eb', '#8b5cf6', '#16a34a', '#0ea5e9'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom'
+      }
+    }
+  }
+});
+</script>
+{% endblock %}

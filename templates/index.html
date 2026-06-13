@@ -1,0 +1,918 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GESPRO - Plataforma de Gestion de Proyectos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --navy: #10243d;
+      --navy-2: #193454;
+      --ink: #091626;
+      --muted: #58708d;
+      --blue: #2d73df;
+      --cyan: #32b3e8;
+      --teal: #0f8f82;
+      --amber: #f2a83b;
+      --line: rgba(16, 36, 61, 0.14);
+      --surface: #ffffff;
+      --soft: #f2f7fb;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'DM Sans', Arial, sans-serif;
+      color: var(--ink);
+      background: var(--soft);
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .welcome-page {
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      padding: 12px 44px;
+      background: rgba(16, 36, 61, 0.94);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(16px);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 188px;
+      min-height: 58px;
+      padding: 8px 18px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .brand img {
+      width: 118px;
+      height: auto;
+      display: block;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 0 16px;
+      border-radius: 8px;
+      color: #ffffff;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    .nav-link:hover,
+    .nav-link.is-active {
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      color: #ffffff;
+      box-shadow: 0 10px 24px rgba(50, 179, 232, 0.22);
+      transform: translateY(-1px);
+    }
+
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 120px 48px 80px;
+      color: #ffffff;
+      background: #081525;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: -24px;
+      background:
+        linear-gradient(90deg, rgba(7, 18, 31, 0.94) 0%, rgba(13, 34, 58, 0.78) 47%, rgba(13, 34, 58, 0.42) 100%),
+        url("{% static 'img/2148430814.jpg' %}") center / cover no-repeat;
+      animation: heroDrift 18s ease-in-out infinite alternate;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(115deg, transparent 0%, rgba(50, 179, 232, 0.08) 38%, transparent 58%),
+        linear-gradient(180deg, transparent 0%, rgba(8, 21, 37, 0.2) 100%);
+      background-size: 180% 100%, 100% 100%;
+      animation: heroLight 12s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .hero-shader {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.48;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .hero-shader canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    @keyframes heroDrift {
+      from { transform: scale(1.02) translate3d(-10px, -8px, 0); }
+      to { transform: scale(1.08) translate3d(14px, 10px, 0); }
+    }
+
+    @keyframes heroLight {
+      0%, 100% { background-position: -40% 0, 0 0; opacity: 0.72; }
+      50% { background-position: 120% 0, 0 0; opacity: 1; }
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.7fr);
+      gap: 40px;
+      align-items: center;
+      transform: translateY(-34px);
+    }
+
+    .hero-copy {
+      max-width: 720px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      color: #aee6ff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--amber);
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-family: 'Sora', Arial, sans-serif;
+      font-size: clamp(3.2rem, 7vw, 6.5rem);
+      line-height: 0.95;
+      letter-spacing: 0;
+      font-weight: 800;
+    }
+
+    .hero h1 .brand-name {
+      position: relative;
+      display: inline-block;
+      padding-right: 6px;
+      color: #ffffff;
+      background: linear-gradient(180deg, #ffffff 8%, #eaf8ff 46%, #9ceeff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 18px 38px rgba(0, 0, 0, 0.38);
+      filter: drop-shadow(0 0 18px rgba(50, 179, 232, 0.22));
+    }
+
+    .hero h1 .brand-name::before {
+      content: "GESPRO";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      color: rgba(50, 179, 232, 0.18);
+      -webkit-text-fill-color: rgba(50, 179, 232, 0.18);
+      transform: translate(8px, 8px);
+      filter: blur(2px);
+    }
+
+    .hero h1 .brand-name::after {
+      content: "";
+      position: absolute;
+      left: 6px;
+      right: 14px;
+      bottom: -13px;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--amber) 0%, #48d3ff 48%, var(--teal) 100%);
+      box-shadow: 0 10px 28px rgba(50, 179, 232, 0.34);
+    }
+
+    .hero h1 span {
+      display: block;
+      color: #b9f0ff;
+      font-size: clamp(1.35rem, 2.4vw, 2.2rem);
+      line-height: 1.22;
+      margin-top: 18px;
+      font-weight: 600;
+    }
+
+    .hero-text {
+      max-width: 650px;
+      margin: 24px 0 0;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 1.08rem;
+      line-height: 1.75;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 46px;
+      padding: 0 22px;
+      border-radius: 8px;
+      font-weight: 800;
+      border: 1px solid transparent;
+      transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      color: #ffffff;
+      box-shadow: 0 16px 32px rgba(45, 115, 223, 0.24);
+    }
+
+    .btn-ghost {
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.34);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-map {
+      display: grid;
+      gap: 10px;
+      align-content: end;
+    }
+
+    .map-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 56px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(12px);
+    }
+
+    .map-step i {
+      width: 34px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: rgba(50, 179, 232, 0.18);
+      color: #9beaff;
+      font-size: 1.2rem;
+      flex: 0 0 auto;
+    }
+
+    .map-step strong {
+      display: block;
+      font-size: 0.96rem;
+      color: #ffffff;
+    }
+
+    .map-step span {
+      display: block;
+      margin-top: 2px;
+      color: rgba(255, 255, 255, 0.66);
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .section {
+      width: min(1180px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 70px 0;
+    }
+
+    .section-head {
+      max-width: 760px;
+      margin-bottom: 30px;
+    }
+
+    .section-kicker {
+      margin: 0 0 10px;
+      color: var(--teal);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .section h2 {
+      margin: 0;
+      font-family: 'Sora', Arial, sans-serif;
+      font-size: clamp(2rem, 3vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: 0;
+      color: var(--ink);
+    }
+
+    .section-lead {
+      margin: 14px 0 0;
+      color: var(--muted);
+      line-height: 1.72;
+      font-size: 1rem;
+    }
+
+    .role-grid,
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .info-card {
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      padding: 24px;
+      box-shadow: 0 16px 38px rgba(16, 36, 61, 0.08);
+    }
+
+    .info-icon {
+      width: 44px;
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      margin-bottom: 18px;
+      color: #ffffff;
+      background: var(--blue);
+      font-size: 1.35rem;
+    }
+
+    .info-icon.teal { background: var(--teal); }
+    .info-icon.amber { background: var(--amber); }
+
+    .info-card h3 {
+      margin: 0 0 10px;
+      font-family: 'Sora', Arial, sans-serif;
+      font-size: 1.12rem;
+      color: var(--ink);
+    }
+
+    .info-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.62;
+      font-size: 0.95rem;
+    }
+
+    .flow-band {
+      background: #ffffff;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .flow-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .flow-item {
+      position: relative;
+      min-height: 150px;
+      padding: 20px;
+      border-radius: 8px;
+      background: #f7fbff;
+      border: 1px solid var(--line);
+    }
+
+    .flow-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      margin-bottom: 18px;
+      background: var(--navy);
+      color: #ffffff;
+      font-weight: 800;
+    }
+
+    .flow-item h3 {
+      margin: 0 0 8px;
+      color: var(--ink);
+      font-size: 1rem;
+      font-family: 'Sora', Arial, sans-serif;
+    }
+
+    .flow-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .system-layout {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .logic-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .logic-item {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 18px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+    }
+
+    .logic-item i {
+      width: 44px;
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: #e9f3ff;
+      color: var(--blue);
+      font-size: 1.25rem;
+    }
+
+    .logic-item strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 5px;
+    }
+
+    .logic-item span {
+      display: block;
+      color: var(--muted);
+      line-height: 1.52;
+      font-size: 0.94rem;
+    }
+
+    .preview-frame {
+      border-radius: 8px;
+      background: #0b1a2d;
+      border: 1px solid rgba(16, 36, 61, 0.18);
+      box-shadow: 0 20px 48px rgba(16, 36, 61, 0.18);
+      overflow: hidden;
+    }
+
+    .preview-top {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      height: 38px;
+      padding: 0 14px;
+      background: #142845;
+    }
+
+    .preview-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ff6b6b;
+    }
+
+    .preview-dot:nth-child(2) { background: #f2c94c; }
+    .preview-dot:nth-child(3) { background: #27c278; }
+
+    .preview-frame img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .module-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .module-card {
+      min-height: 142px;
+      border-radius: 8px;
+      padding: 20px;
+      background: var(--navy);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .module-card i {
+      font-size: 1.45rem;
+      color: #9beaff;
+    }
+
+    .module-card h3 {
+      margin: 18px 0 8px;
+      font-size: 1rem;
+      font-family: 'Sora', Arial, sans-serif;
+    }
+
+    .module-card p {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.68);
+      line-height: 1.5;
+      font-size: 0.9rem;
+    }
+
+    .closing {
+      padding: 62px 24px 74px;
+      text-align: center;
+      color: #ffffff;
+      background:
+        linear-gradient(90deg, rgba(16, 36, 61, 0.98), rgba(15, 143, 130, 0.86)),
+        url("{% static 'img/2148430814.jpg' %}") center / cover no-repeat;
+    }
+
+    .closing h2 {
+      margin: 0 auto;
+      max-width: 760px;
+      font-family: 'Sora', Arial, sans-serif;
+      font-size: clamp(2rem, 3vw, 3rem);
+      line-height: 1.12;
+    }
+
+    .closing p {
+      max-width: 660px;
+      margin: 16px auto 26px;
+      color: rgba(255, 255, 255, 0.78);
+      line-height: 1.7;
+    }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 20px 48px;
+      color: rgba(255, 255, 255, 0.74);
+      background: #081525;
+      font-size: 0.88rem;
+      text-align: center;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    @media (max-width: 1050px) {
+      .hero-inner,
+      .system-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-map {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .flow-row,
+      .module-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        position: static;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px 16px;
+      }
+
+      .brand {
+        width: 100%;
+      }
+
+      .nav-actions {
+        overflow-x: auto;
+        justify-content: flex-start;
+      }
+
+      .nav-link {
+        white-space: nowrap;
+      }
+
+      .hero {
+        min-height: auto;
+        padding: 54px 24px 34px;
+      }
+
+      .hero-map,
+      .role-grid,
+      .flow-row,
+      .module-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section {
+        width: min(100% - 32px, 1180px);
+        padding: 52px 0;
+      }
+
+      .footer {
+        flex-direction: column;
+        text-align: center;
+        padding: 22px 18px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero::before,
+      .hero::after {
+        animation: none;
+      }
+
+      .hero-shader {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="welcome-page">
+    <header class="topbar">
+      <a class="brand" href="{% url 'accounts:index' %}" aria-label="Inicio GESPRO">
+        <img src="{% static 'img/logo3.png' %}" alt="GESPRO">
+      </a>
+      <nav class="nav-actions" aria-label="Navegacion principal">
+        <a class="nav-link is-active" href="{% url 'accounts:index' %}">Inicio</a>
+        <a class="nav-link" href="{% url 'accounts:login' %}">Ingresar</a>
+        <a class="nav-link" href="{% url 'accounts:register' %}">Registrarse</a>
+        <a class="nav-link" href="{% url 'accounts:password_recovery' %}">Recuperar acceso</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-shader" id="gesproShader" aria-hidden="true"></div>
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <div class="eyebrow">Plataforma academica institucional</div>
+          <h1><strong class="brand-name">GESPRO</strong><span>Gestion academica y seguimiento de proyectos formativos.</span></h1>
+          <p class="hero-text">
+            Acompana el trabajo de administradores, instructores y aprendices para que
+            el seguimiento de cada proyecto sea mas claro, ordenado y facil de consultar.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="{% url 'accounts:login' %}">
+              <i class="ti ti-login-2" aria-hidden="true"></i>
+              Ingresar al sistema
+            </a>
+            <a class="btn btn-ghost" href="{% url 'accounts:register' %}">
+              <i class="ti ti-user-plus" aria-hidden="true"></i>
+              Crear cuenta
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Cada usuario entra a un modulo segun sus permisos.</h2>
+        <p class="section-lead">
+          GESPRO separa las funciones para que cada perfil trabaje solo con la informacion
+          y las acciones que necesita dentro del proceso formativo.
+        </p>
+      </div>
+      <div class="role-grid">
+        <article class="info-card">
+          <span class="info-icon"><i class="ti ti-shield-cog" aria-hidden="true"></i></span>
+          <h3>Administrador</h3>
+          <p>Organiza la informacion principal del sistema y mantiene la plataforma lista para el trabajo academico.</p>
+        </article>
+        <article class="info-card">
+          <span class="info-icon teal"><i class="ti ti-school" aria-hidden="true"></i></span>
+          <h3>Instructor</h3>
+          <p>Acompana el avance de los aprendices, revisa sus entregas y registra el resultado de su proceso.</p>
+        </article>
+        <article class="info-card">
+          <span class="info-icon amber"><i class="ti ti-user-check" aria-hidden="true"></i></span>
+          <h3>Aprendiz</h3>
+          <p>Consulta su informacion, trabaja en su proyecto y mantiene sus entregas al dia dentro de la plataforma.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="flow-band">
+      <div class="section">
+        <div class="section-head">
+          <h2>Del grupo formativo al seguimiento del proyecto.</h2>
+          <p class="section-lead">
+            La informacion se organiza de forma progresiva para mantener trazabilidad desde
+            la asignacion academica hasta la evidencia entregada por los aprendices.
+          </p>
+        </div>
+        <div class="flow-row">
+          <article class="flow-item">
+            <span class="flow-number">1</span>
+            <h3>Ficha</h3>
+            <p>Agrupa aprendices, instructores y datos academicos del programa.</p>
+          </article>
+          <article class="flow-item">
+            <span class="flow-number">2</span>
+            <h3>Trimestre</h3>
+            <p>Define el periodo de seguimiento y las actividades evaluables.</p>
+          </article>
+          <article class="flow-item">
+            <span class="flow-number">3</span>
+            <h3>Equipo GAES</h3>
+            <p>Organiza aprendices para trabajar el proyecto formativo.</p>
+          </article>
+          <article class="flow-item">
+            <span class="flow-number">4</span>
+            <h3>Proyecto</h3>
+            <p>Relaciona el equipo con objetivos, avances y entregables.</p>
+          </article>
+          <article class="flow-item">
+            <span class="flow-number">5</span>
+            <h3>Evaluacion</h3>
+            <p>Registra calificaciones, observaciones y resultado final.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="closing">
+      <h2>Un entorno para controlar el avance academico con orden y trazabilidad.</h2>
+      <p>
+        GESPRO ayuda a reducir procesos manuales, centralizar la informacion y mantener
+        un seguimiento claro de cada proyecto formativo.
+      </p>
+      <a class="btn btn-primary" href="{% url 'accounts:login' %}">
+        <i class="ti ti-arrow-right" aria-hidden="true"></i>
+        Entrar a GESPRO
+      </a>
+    </section>
+
+    <footer class="footer">
+      <span>&copy; Derechos reservados de GESPRO</span>
+    </footer>
+  </main>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    (function () {
+      const container = document.getElementById("gesproShader");
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (!container || reduceMotion || !window.THREE) {
+        return;
+      }
+
+      const vertexShader = "void main(){gl_Position=vec4(position,1.0);}";
+      const fragmentShader = `
+        precision highp float;
+
+        uniform vec2 u_resolution;
+        uniform float u_time;
+
+        void main() {
+          vec2 uv = (gl_FragCoord.xy - u_resolution * 0.5) / u_resolution.yy;
+          uv += vec2(0.62, 0.48);
+
+          float c = distance(uv, vec2(0.5));
+          float wave = u_time * 1.15;
+          float ring = sin(c * 10.0 - wave * 2.4);
+          float pulse = 0.5 + 0.5 * sin((uv.x + uv.y) * 4.0 + wave);
+
+          vec3 deepBlue = vec3(0.02, 0.12, 0.26);
+          vec3 gesproBlue = vec3(0.05, 0.42, 0.88);
+          vec3 cyan = vec3(0.12, 0.82, 1.0);
+          vec3 teal = vec3(0.02, 0.62, 0.54);
+          vec3 amber = vec3(1.0, 0.64, 0.14);
+
+          vec3 light = mix(gesproBlue, cyan, pulse);
+          light = mix(light, teal, smoothstep(0.25, 0.95, uv.x));
+          light += amber * max(0.0, ring) * 0.18;
+
+          float glow = smoothstep(0.78, 0.02, c);
+          vec3 color = mix(deepBlue, light, glow);
+          color += cyan * pow(max(0.0, 1.0 - c), 2.8) * 0.32;
+
+          gl_FragColor = vec4(color, 1.0);
+        }
+      `;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.Camera();
+      camera.position.z = 1;
+
+      const renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        powerPreference: "high-performance"
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      container.appendChild(renderer.domElement);
+
+      const uniforms = {
+        u_time: { value: 0 },
+        u_resolution: { value: new THREE.Vector2() }
+      };
+
+      const mesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(2, 2),
+        new THREE.ShaderMaterial({
+          uniforms: uniforms,
+          vertexShader: vertexShader,
+          fragmentShader: fragmentShader
+        })
+      );
+
+      scene.add(mesh);
+
+      const clock = new THREE.Clock();
+
+      function resizeShader() {
+        const width = container.clientWidth || window.innerWidth;
+        const height = container.clientHeight || window.innerHeight;
+
+        renderer.setSize(width, height, false);
+        uniforms.u_resolution.value.set(
+          renderer.domElement.width,
+          renderer.domElement.height
+        );
+      }
+
+      function animateShader() {
+        uniforms.u_time.value = clock.getElapsedTime();
+        renderer.render(scene, camera);
+        window.requestAnimationFrame(animateShader);
+      }
+
+      resizeShader();
+      window.addEventListener("resize", resizeShader);
+      animateShader();
+    })();
+  </script>
+</body>
+</html>

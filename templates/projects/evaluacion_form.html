@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-instructor form-shell">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">{{ title }}</h1>
+                <p class="page-subtitle">Filtra por ficha y equipo Scrum para calificar solo a los aprendices que corresponden.</p>
+            </div>
+        </div>
+
+        <form method="get" class="form-grid evaluation-filter-form">
+            <div>
+                <div class="form-field">
+                    <label for="ficha-filter">Ficha</label>
+                    <select id="ficha-filter" name="ficha">
+                        <option value="">Todas las fichas</option>
+                        {% for ficha in fichas %}
+                            <option value="{{ ficha.id }}" {% if ficha.id == selected_ficha_id %}selected{% endif %}>
+                                {{ ficha.codigo_ficha }} - {{ ficha.programa_formacion }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <small class="field-help">Selecciona una ficha para reducir los equipos Scrum disponibles.</small>
+                </div>
+            </div>
+            <div>
+                <div class="form-field">
+                    <label for="gaes-filter">Equipo Scrum</label>
+                    <select id="gaes-filter" name="gaes">
+                        <option value="">Todos los equipos</option>
+                        {% for equipo in equipos_scrum %}
+                            <option value="{{ equipo.id }}" {% if equipo.id == selected_gaes_id %}selected{% endif %}>
+                                {{ equipo.nombre }} - {{ equipo.total_aprendices }} aprendices
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <small class="field-help">Selecciona un equipo para ver sus aprendices y filtrar la calificacion.</small>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn" type="submit">Filtrar</button>
+                <a class="btn-secondary" href="{{ clear_filters_url }}">Limpiar filtros</a>
+            </div>
+        </form>
+
+        <div class="evaluation-filter-summary">
+            {% if equipo_seleccionado %}
+                <p class="table-note">
+                    Equipo seleccionado: <strong>{{ equipo_seleccionado.nombre }}</strong>.
+                    Aprendices encontrados: <strong>{{ aprendices_scrum|length }}</strong>.
+                </p>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Aprendiz</th>
+                                <th>Documento</th>
+                                <th>Ficha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for aprendiz in aprendices_scrum %}
+                                <tr>
+                                    <td>{{ aprendiz.usuario.nombre }} {{ aprendiz.usuario.apellido }}</td>
+                                    <td>{{ aprendiz.usuario.numero_documento }}</td>
+                                    <td>{{ aprendiz.ficha.codigo_ficha }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="3" class="empty-state">Este equipo Scrum no tiene aprendices asociados.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="table-note">
+                    Equipos Scrum disponibles: <strong>{{ equipos_scrum|length }}</strong>.
+                    Selecciona uno para ver sus aprendices antes de guardar la calificacion.
+                </p>
+            {% endif %}
+        </div>
+
+        <form method="post" class="form-grid evaluation-save-form">
+            {% csrf_token %}
+            {% include "includes/form_fields.html" with form=form %}
+            <div class="form-actions">
+                <button class="btn" type="submit">Guardar calificacion</button>
+                <a class="btn-secondary" href="{% url 'projects:evaluacion_list' %}">Volver</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

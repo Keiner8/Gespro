@@ -1,0 +1,33 @@
+{% if form.non_field_errors %}
+    <div class="form-errors-summary full-span">
+        {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
+{% for hidden in form.hidden_fields %}
+    {{ hidden }}
+{% endfor %}
+{% for field in form.visible_fields %}
+    <div class="{% if field.name == 'descripcion' or field.name == 'observaciones' or field.name == 'texto' %}full-span{% endif %}">
+        <div class="form-field">
+            <label for="{{ field.id_for_label }}">
+                {{ field.label }}
+                {% if field.field.required %}
+                    <span class="required-mark">*</span>
+                {% endif %}
+            </label>
+            {{ field }}
+            {% if field.help_text %}
+                <small class="field-help">{{ field.help_text }}</small>
+            {% endif %}
+            {% if field.errors %}
+                <ul class="field-errors">
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+{% endfor %}

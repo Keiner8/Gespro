@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Historial por trimestre | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-aprendiz module-board">
+        <div class="module-hero">
+            <div class="module-hero-copy">
+                <span class="final-eyebrow">Proceso formativo</span>
+                <h1 class="page-title">Historial por trimestre</h1>
+                <p class="page-subtitle">Consulta tu avance por trimestre, los instructores relacionados, las fechas del periodo y tus evaluaciones.</p>
+            </div>
+            <div class="module-hero-actions">
+                <span class="page-meta">{{ rows|length }} trimestres visibles</span>
+            </div>
+        </div>
+
+        {% if aprendiz %}
+            <div class="history-timeline">
+                {% for row in rows %}
+                    <article class="history-card">
+                        <div class="history-marker">
+                            <span>{{ row.trimestre.numero }}</span>
+                        </div>
+                        <div class="history-content">
+                            <div class="history-card-head">
+                                <div>
+                                    <span class="history-kicker">Trimestre {{ row.trimestre.numero }}</span>
+                                    <h2>{{ row.trimestre.ficha.codigo_ficha }} - {{ row.trimestre.ficha.programa_formacion }}</h2>
+                                    <p>{{ row.trimestre.fecha_inicio|date:"d/m/Y" }} al {{ row.trimestre.fecha_fin|date:"d/m/Y" }}</p>
+                                </div>
+                                <span class="status-badge {{ row.trimestre.estado }}">{{ row.trimestre.get_estado_display }}</span>
+                            </div>
+
+                            <div class="history-grid">
+                                <div class="history-mini-card">
+                                    <span>Instructores y áreas</span>
+                                    <strong>{{ row.instructores|length }}</strong>
+                                    <div class="summary-chips">
+                                        {% for instructor in row.instructores %}
+                                            <span class="summary-chip summary-chip-soft">
+                                                {{ instructor.usuario.nombre }} {{ instructor.usuario.apellido }}
+                                                {% if instructor.especialidad %} - {{ instructor.especialidad }}{% endif %}
+                                            </span>
+                                        {% empty %}
+                                            <span class="summary-chip summary-chip-muted">Sin instructor registrado.</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="history-mini-card">
+                                    <span>Entregables</span>
+                                    <strong>{{ row.entregables|length }}</strong>
+                                    <p>{% if row.entregables %}Actividades del trimestre.{% else %}Sin entregables registrados.{% endif %}</p>
+                                </div>
+                                <div class="history-mini-card">
+                                    <span>Resultado final</span>
+                                    {% if row.evaluacion_final %}
+                                        <strong>{{ row.evaluacion_final.get_estado_display }}</strong>
+                                        <p>{{ row.evaluacion_final.observaciones|default:"Sin observación registrada." }}</p>
+                                    {% else %}
+                                        <strong>Pendiente</strong>
+                                        <p>Pendiente por registrar.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="table-container history-table">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Entregable</th>
+                                            <th>Disponible hasta</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for entregable in row.entregables %}
+                                            <tr>
+                                                <td>{{ entregable.nombre }}</td>
+                                                <td>{% if entregable.fecha_limite %}{{ entregable.fecha_limite|date:"d/m/Y" }}{% else %}<span class="cell-sub">Fecha indefinida</span>{% endif %}</td>
+                                                <td>{% if entregable.url or entregable.nombre_archivo %}<span class="status-badge activo">Entregado</span>{% else %}<span class="status-badge pendiente">Pendiente</span>{% endif %}</td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr><td colspan="3" class="empty-state">No hay entregables registrados en este trimestre.</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="history-evaluations">
+                                <strong>Calificaciones</strong>
+                                <div class="summary-chips">
+                                    {% for evaluacion in row.evaluaciones %}
+                                        <span class="summary-chip summary-chip-current">{{ evaluacion.entregable.nombre }}: {{ evaluacion.calificacion }}</span>
+                                    {% empty %}
+                                        <span class="summary-chip summary-chip-muted">Sin evaluaciones registradas.</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                {% empty %}
+                    <p class="empty-state">Todavía no tienes trimestres registrados en tu ficha.</p>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="empty-state">No tienes una ficha asociada para consultar el historial.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

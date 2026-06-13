@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Instructores | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-admin">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Instructores</h1>
+                <span class="page-meta">{{ instructores|length }} registros visibles</span>
+            </div>
+            {% if current_usuario.rol.nombre_rol|lower == 'administrador' %}
+                <div class="btn-row">
+                    <a class="btn" href="{% url 'academic:instructor_create' %}">Nuevo instructor</a>
+                    <a class="btn-secondary" href="{% url 'academic:instructor_bulk_upload' %}">Carga masiva</a>
+                </div>
+            {% endif %}
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Instructor</th>
+                        <th>Tipo documento</th>
+                        <th>Número documento</th>
+                        <th>Correo</th>
+                        <th>Ficha</th>
+                        <th>Trimestre</th>
+                        <th>Especialidad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in instructores %}
+                        <tr>
+                            <td>
+                                <div class="cell-stack">
+                                    <span class="cell-main">{{ item.usuario.nombre }} {{ item.usuario.apellido }}</span>
+                                </div>
+                            </td>
+                            <td>{{ item.usuario.tipo_documento }}</td>
+                            <td class="mono-text">{{ item.usuario.numero_documento }}</td>
+                            <td>{{ item.usuario.correo }}</td>
+                            <td>{% if item.ficha %}{{ item.ficha.codigo_ficha }}{% else %}<span class="cell-sub">Sin ficha</span>{% endif %}</td>
+                            <td>{% if item.trimestre %}Trimestre {{ item.trimestre.numero }}{% else %}<span class="cell-sub">Sin trimestre</span>{% endif %}</td>
+                            <td>{{ item.especialidad }}</td>
+                            <td>
+                                {% if current_usuario.rol.nombre_rol|lower == 'administrador' %}
+                                    <div class="actions-group">
+                                        <a class="btn-outline" href="{% url 'academic:instructor_update' item.id %}">Editar</a>
+                                        <form method="post" action="{% url 'academic:instructor_delete' item.id %}" class="inline-form">
+                                            {% csrf_token %}
+                                            <button class="btn-link" type="submit">Eliminar</button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <span class="status-badge activo">Consulta</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="8" class="empty-state">No hay instructores registrados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

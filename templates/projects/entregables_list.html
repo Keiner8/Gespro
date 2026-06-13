@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Entregables | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-aprendiz module-board">
+        <div class="module-hero">
+            <div class="module-hero-copy">
+                <span class="final-eyebrow">Seguimiento de evidencias</span>
+                <h1 class="page-title">Entregables</h1>
+                <p class="page-subtitle">Consulta las actividades asignadas, su fecha límite y el estado de la evidencia cargada.</p>
+            </div>
+            <div class="module-hero-actions">
+                <span class="page-meta">{{ entregables|length }} registros visibles</span>
+                {% if current_usuario.rol.nombre_rol|lower != 'aprendiz' %}
+                    <a class="btn" href="{% url 'projects:entregable_create' %}">Nuevo entregable</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="table-container module-table-container">
+            <table class="data-table module-table">
+                <thead>
+                    <tr>
+                        <th>Entregable</th>
+                        <th>Proyecto</th>
+                        <th>Aprendiz</th>
+                        <th>Fecha límite</th>
+                        <th>Archivo o enlace</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in entregables %}
+                        <tr>
+                            <td>
+                                <div class="cell-stack">
+                                    <span class="cell-main">{{ item.nombre }}</span>
+                                    <span class="cell-sub">{{ item.descripcion|default:"Sin descripcion" }}</span>
+                                </div>
+                            </td>
+                            <td>{{ item.proyecto.nombre }}</td>
+                            <td>{% if item.aprendiz %}{{ item.aprendiz.usuario.nombre }} {{ item.aprendiz.usuario.apellido }}{% else %}<span class="cell-sub">Scrum completo</span>{% endif %}</td>
+                            <td>
+                                {% if item.fecha_limite %}
+                                    <span class="status-badge {% now 'Y-m-d' as today %}{% if item.fecha_limite|date:'Y-m-d' < today %}inactivo{% else %}activo{% endif %}">
+                                        {{ item.fecha_limite|date:"d/m/Y" }}
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge pendiente">Fecha indefinida</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.nombre_archivo %}
+                                    <span class="mono-text">{{ item.nombre_archivo }}</span>
+                                {% elif item.url %}
+                                    {{ item.url }}
+                                {% else %}
+                                    <span class="cell-sub">Pendiente de entrega</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="actions-group">
+                                    {% if item.nombre_archivo or item.url %}
+                                        <a class="btn-outline" href="{% url 'projects:entregable_open' item.id %}">
+                                            Abrir
+                                        </a>
+                                        {% if item.nombre_archivo %}
+                                            <a class="btn-secondary" href="{% url 'projects:entregable_download' item.id %}">
+                                                Descargar
+                                            </a>
+                                        {% endif %}
+                                    {% endif %}
+                                    {% if current_usuario.rol.nombre_rol|lower == 'aprendiz' %}
+                                        {% now "Y-m-d" as today %}
+                                        {% if item.fecha_limite and item.fecha_limite|date:"Y-m-d" < today %}
+                                            <span class="status-badge inactivo">Entrega cerrada</span>
+                                        {% else %}
+                                            <a class="btn-outline" href="{% url 'projects:entregable_update' item.id %}">Entregar evidencia</a>
+                                        {% endif %}
+                                    {% else %}
+                                        <a class="btn-outline" href="{% url 'projects:entregable_update' item.id %}">Editar</a>
+                                        <form method="post" action="{% url 'projects:entregable_delete' item.id %}" class="inline-form">
+                                            {% csrf_token %}
+                                            <button class="btn-link" type="submit">Eliminar</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="6" class="empty-state">No hay entregables registrados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

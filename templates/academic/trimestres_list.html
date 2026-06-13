@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Trimestres | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-admin">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Trimestres</h1>
+                <span class="page-meta">{{ trimestres|length }} registros visibles</span>
+            </div>
+            {% if current_usuario.rol.nombre_rol|lower == 'administrador' %}
+                <a class="btn" href="{% url 'academic:trimestre_create' %}">Nuevo trimestre</a>
+            {% endif %}
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Numero</th>
+                        <th>Ficha</th>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in trimestres %}
+                        <tr>
+                            <td class="mono-text">T{{ item.numero }}</td>
+                            <td>{{ item.ficha.codigo_ficha }}</td>
+                            <td>{{ item.fecha_inicio }}</td>
+                            <td>{{ item.fecha_fin }}</td>
+                            <td><span class="status-badge {{ item.estado|lower }}">{{ item.estado }}</span></td>
+                            <td>
+                                {% if current_usuario.rol.nombre_rol|lower == 'administrador' %}
+                                    <div class="actions-group">
+                                        <a class="btn-outline" href="{% url 'academic:trimestre_update' item.id %}">Editar</a>
+                                        <form method="post" action="{% url 'academic:trimestre_delete' item.id %}" class="inline-form">
+                                            {% csrf_token %}
+                                            <button class="btn-link" type="submit">Eliminar</button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <span class="status-badge activo">Consulta</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="6" class="empty-state">No hay trimestres registrados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

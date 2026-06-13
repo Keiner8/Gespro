@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-aprendiz form-shell">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">{{ title }}</h1>
+                <p class="page-subtitle">Adjunta el archivo o enlace solicitado para que el instructor pueda revisar tu evidencia.</p>
+            </div>
+        </div>
+
+        <div class="scrum-members-panel">
+            <strong>{{ item.nombre }}</strong>
+            <p class="table-note">{{ item.descripcion|default:"Sin descripcion" }}</p>
+            <div class="summary-chips">
+                <span class="summary-chip">{{ item.proyecto.nombre }}</span>
+                <span class="summary-chip summary-chip-soft">{{ item.trimestre }}</span>
+                {% if item.fecha_limite %}
+                    <span class="summary-chip summary-chip-current">Disponible hasta {{ item.fecha_limite|date:"d/m/Y" }}</span>
+                {% else %}
+                    <span class="summary-chip summary-chip-muted">Fecha indefinida</span>
+                {% endif %}
+                {% if item.aprendiz %}
+                    <span class="summary-chip summary-chip-current">Individual</span>
+                {% else %}
+                    <span class="summary-chip summary-chip-current">Scrum completo</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="form-grid form-offset-top">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="form-errors-summary full-span">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div>
+                <div class="form-field">
+                    <label for="{{ form.url.id_for_label }}">Url</label>
+                    {{ form.url }}
+                    {% if form.url.help_text %}<small class="field-help">{{ form.url.help_text }}</small>{% endif %}
+                    {% if form.url.errors %}<ul class="field-errors">{% for error in form.url.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div>
+                <div class="form-field">
+                    <label for="{{ form.archivo_upload.id_for_label }}">Archivo</label>
+                    {{ form.archivo_upload }}
+                    {% if form.archivo_upload.help_text %}<small class="field-help">{{ form.archivo_upload.help_text }}</small>{% endif %}
+                    {% if form.archivo_upload.errors %}<ul class="field-errors">{% for error in form.archivo_upload.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn" type="submit">Entregar evidencia</button>
+                <a class="btn-secondary" href="{% url 'projects:entregable_list' %}">Volver</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

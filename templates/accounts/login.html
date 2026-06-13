@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Ingresar | GESPRO{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block content %}
+<section class="auth-shell auth-shell-login">
+    <div class="auth-card auth-card-login auth-login-split-card">
+        <aside class="auth-login-brand-panel" aria-label="Marca GESPRO">
+            <div class="auth-login-logo-frame">
+                <img src="{% static 'img/logo3.png' %}" alt="GESPRO">
+            </div>
+            <span class="auth-login-pill">Plataforma académica</span>
+            <h2>GESPRO</h2>
+        </aside>
+
+        <div class="auth-login-form-panel">
+            <h1 class="page-title">Iniciar sesión</h1>
+
+            <form id="login-form" method="post" class="form-grid form-grid-login form-offset-top">
+                {% csrf_token %}
+                {% include "includes/form_fields.html" with form=form %}
+                <div class="full-span auth-login-actions">
+                    <a class="auth-inline-link auth-forgot-link" href="{% url 'accounts:password_recovery' %}">¿Olvidaste tu contraseña?</a>
+                    <div class="form-actions form-actions-login form-actions-login-center">
+                        <button class="btn auth-login-submit" type="submit">Iniciar sesión</button>
+                    </div>
+                    <div class="auth-links auth-links-login auth-links-login-center">
+                        <a class="auth-register-link" href="{% url 'accounts:register' %}">
+                            <strong class="auth-register-question">¿No tienes cuenta?</strong>
+                            <span>Regístrate</span>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

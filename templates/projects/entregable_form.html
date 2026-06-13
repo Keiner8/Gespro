@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-instructor form-shell">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">{{ title }}</h1>
+                <p class="page-subtitle">
+                    {% if current_usuario.rol.nombre_rol|lower == 'aprendiz' %}
+                        Registra la evidencia correspondiente al proyecto y trimestre asignado.
+                    {% else %}
+                        Primero filtra por ficha y decide si el entregable va dirigido al Scrum completo o a un aprendiz puntual.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        {% if current_usuario.rol.nombre_rol|lower != 'aprendiz' %}
+            <form method="get" class="filter-panel form-grid">
+                <div class="form-field">
+                    <label for="ficha-filter">Ficha</label>
+                    <select id="ficha-filter" name="ficha">
+                        <option value="">Selecciona una ficha</option>
+                        {% for ficha in fichas %}
+                            <option value="{{ ficha.id }}" {% if ficha.id == selected_ficha_id %}selected{% endif %}>
+                                {{ ficha.codigo_ficha }} - {{ ficha.programa_formacion }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <small class="field-help">Elige una ficha para cargar solo sus proyectos, trimestres y aprendices.</small>
+                </div>
+                <div class="form-field">
+                    <label for="gaes-filter">Equipo Scrum</label>
+                    <select id="gaes-filter" name="gaes">
+                        <option value="">Todos los Scrum de la ficha</option>
+                        {% for equipo in equipos_scrum %}
+                            <option value="{{ equipo.id }}" {% if equipo.id == selected_gaes_id %}selected{% endif %}>
+                                {{ equipo.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <small class="field-help">Opcional: filtra por un Scrum específico.</small>
+                </div>
+                <div class="form-field">
+                    <label for="destino-filter">Dirigido a</label>
+                    <select id="destino-filter" name="destino">
+                        <option value="scrum" {% if selected_destino == 'scrum' %}selected{% endif %}>Scrum completo</option>
+                        <option value="aprendiz" {% if selected_destino == 'aprendiz' %}selected{% endif %}>Aprendiz individual</option>
+                    </select>
+                    <small class="field-help">Define si la actividad es grupal o individual.</small>
+                </div>
+                <div class="form-actions">
+                    <button class="btn" type="submit">Aplicar filtro</button>
+                    <a class="btn-secondary" href="{{ clear_filters_url }}">Limpiar</a>
+                </div>
+            </form>
+
+            {% if selected_destino == 'aprendiz' and selected_ficha_id %}
+                <div class="scrum-members-panel form-offset-top">
+                    <strong>
+                        {% if selected_gaes_id %}
+                            Aprendices del Scrum seleccionado
+                        {% else %}
+                            Aprendices de la ficha seleccionada
+                        {% endif %}
+                    </strong>
+                    <div class="summary-chips">
+                        {% for aprendiz in aprendices_disponibles %}
+                            <span class="summary-chip summary-chip-soft">{{ aprendiz.usuario.nombre }} {{ aprendiz.usuario.apellido }}</span>
+                        {% empty %}
+                            <span class="summary-chip summary-chip-muted">No hay aprendices disponibles para el filtro seleccionado.</span>
+                        {% endfor %}
+                    </div>
+                    <p class="table-note">Estos son los aprendices que aparecerán en el campo Aprendiz del formulario.</p>
+                </div>
+            {% elif selected_gaes_id %}
+                <div class="scrum-members-panel form-offset-top">
+                    <strong>Aprendices del Scrum seleccionado</strong>
+                    <div class="summary-chips">
+                        {% for aprendiz in aprendices_scrum %}
+                            <span class="summary-chip summary-chip-soft">{{ aprendiz.usuario.nombre }} {{ aprendiz.usuario.apellido }}</span>
+                        {% empty %}
+                            <span class="summary-chip summary-chip-muted">Este Scrum no tiene aprendices asociados.</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" class="form-grid form-offset-top">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-errors-summary full-span">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div>
+                <div class="form-field">
+                    <label for="{{ form.nombre.id_for_label }}">Nombre <span class="required-mark">*</span></label>
+                    {{ form.nombre }}
+                    {% if form.nombre.errors %}<ul class="field-errors">{% for error in form.nombre.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div class="full-span">
+                <div class="form-field">
+                    <label for="{{ form.descripcion.id_for_label }}">Descripción</label>
+                    {{ form.descripcion }}
+                    {% if form.descripcion.errors %}<ul class="field-errors">{% for error in form.descripcion.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div>
+                <div class="form-field">
+                    <label for="{{ form.proyecto.id_for_label }}">Proyecto <span class="required-mark">*</span></label>
+                    {{ form.proyecto }}
+                    {% if form.proyecto.help_text %}<small class="field-help">{{ form.proyecto.help_text }}</small>{% endif %}
+                    {% if form.proyecto.errors %}<ul class="field-errors">{% for error in form.proyecto.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div>
+                <div class="form-field">
+                    <label for="{{ form.trimestre.id_for_label }}">Trimestre <span class="required-mark">*</span></label>
+                    {{ form.trimestre }}
+                    {% if form.trimestre.help_text %}<small class="field-help">{{ form.trimestre.help_text }}</small>{% endif %}
+                    {% if form.trimestre.errors %}<ul class="field-errors">{% for error in form.trimestre.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div>
+                <div class="form-field">
+                    <label for="{{ form.fecha_limite.id_for_label }}">Fecha límite</label>
+                    {{ form.fecha_limite }}
+                    {% if form.fecha_limite.help_text %}<small class="field-help">{{ form.fecha_limite.help_text }}</small>{% endif %}
+                    {% if form.fecha_limite.errors %}<ul class="field-errors">{% for error in form.fecha_limite.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            {% if current_usuario.rol.nombre_rol|lower == 'aprendiz' or selected_destino == 'aprendiz' %}
+                <div>
+                    <div class="form-field">
+                        <label for="{{ form.aprendiz.id_for_label }}">Aprendiz{% if selected_destino == 'aprendiz' %} <span class="required-mark">*</span>{% endif %}</label>
+                        {{ form.aprendiz }}
+                        {% if form.aprendiz.help_text %}<small class="field-help">{{ form.aprendiz.help_text }}</small>{% endif %}
+                        {% if form.aprendiz.errors %}<ul class="field-errors">{% for error in form.aprendiz.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <div>
+                    <div class="form-field">
+                        <label>Dirigido a</label>
+                        <div class="readonly-field">Scrum completo</div>
+                        <small class="field-help">No selecciones aprendiz cuando la actividad sea para todo el equipo.</small>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div>
+                <div class="form-field">
+                    <label for="{{ form.url.id_for_label }}">Url</label>
+                    {{ form.url }}
+                    {% if form.url.help_text %}<small class="field-help">{{ form.url.help_text }}</small>{% endif %}
+                    {% if form.url.errors %}<ul class="field-errors">{% for error in form.url.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div>
+                <div class="form-field">
+                    <label for="{{ form.archivo_upload.id_for_label }}">Archivo</label>
+                    {{ form.archivo_upload }}
+                    {% if form.archivo_upload.help_text %}<small class="field-help">{{ form.archivo_upload.help_text }}</small>{% endif %}
+                    {% if form.archivo_upload.errors %}<ul class="field-errors">{% for error in form.archivo_upload.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn" type="submit">Guardar</button>
+                <a class="btn-secondary" href="{% url 'projects:entregable_list' %}">Volver</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

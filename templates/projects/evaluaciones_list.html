@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Calificaciones | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-instructor module-board">
+        <div class="module-hero">
+            <div class="module-hero-copy">
+                <span class="final-eyebrow">Entregables</span>
+                <h1 class="page-title">Calificaciones</h1>
+                <p class="page-subtitle">Consulta las notas, el tipo de calificacion y el instructor que califico cada entregable.</p>
+            </div>
+            <div class="module-hero-actions">
+                <span class="page-meta">{{ evaluaciones|length }} registros visibles</span>
+                {% if current_usuario.rol.nombre_rol|lower != 'aprendiz' %}
+                    <a class="btn" href="{% url 'projects:evaluacion_create' %}">Calificar entregable</a>
+                {% endif %}
+            </div>
+        </div>
+        <p class="table-note">Desde aqui puedes revisar si la calificacion fue individual o grupal, quien la registro, la fecha y las observaciones del instructor.</p>
+        <div class="table-container module-table-container">
+            <table class="data-table module-table">
+                <thead>
+                    <tr>
+                        <th>Entregable</th>
+                        <th>Tipo</th>
+                        <th>Aprendiz</th>
+                        <th>Equipo Scrum</th>
+                        <th>Instructor</th>
+                        <th>Calificacion</th>
+                        <th>Escala</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in evaluaciones %}
+                        <tr>
+                            <td>{{ item.entregable.nombre }}</td>
+                            <td>
+                                {% if item.aprendiz and item.gaes %}
+                                    <span class="status-badge activo">Individual y grupal</span>
+                                {% elif current_usuario.rol.nombre_rol|lower == 'aprendiz' and item.gaes_id in aprendiz_gaes_ids and item.aprendiz_id != aprendiz_actual.id and item.entregable.aprendiz_id != aprendiz_actual.id %}
+                                    <span class="status-badge pendiente">Grupal</span>
+                                {% elif item.aprendiz %}
+                                    <span class="status-badge finalizado">Individual</span>
+                                {% elif item.gaes %}
+                                    <span class="status-badge pendiente">Grupal</span>
+                                {% else %}
+                                    <span class="status-badge inactivo">Sin tipo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.aprendiz %}
+                                    {{ item.aprendiz.usuario.nombre }} {{ item.aprendiz.usuario.apellido }}
+                                {% elif item.entregable.aprendiz %}
+                                    {{ item.entregable.aprendiz.usuario.nombre }} {{ item.entregable.aprendiz.usuario.apellido }}
+                                {% elif item.gaes %}
+                                    <span class="cell-sub">Todo el equipo</span>
+                                {% else %}
+                                    <span class="cell-sub">Sin aprendiz</span>
+                                {% endif %}
+                            </td>
+                            <td>{% if item.gaes %}{{ item.gaes.nombre }}{% else %}<span class="cell-sub">Sin equipo</span>{% endif %}</td>
+                            <td>
+                                {% if item.evaluador and item.evaluador.usuario %}
+                                    {{ item.evaluador.usuario.nombre }} {{ item.evaluador.usuario.apellido }}
+                                {% else %}
+                                    <span class="cell-sub">Sin instructor</span>
+                                {% endif %}
+                            </td>
+                            <td class="mono-text">{{ item.calificacion }}</td>
+                            <td>{{ item.get_escala_calificacion_display }}</td>
+                            <td>{{ item.fecha }}</td>
+                            <td>
+                                {% if current_usuario.rol.nombre_rol|lower != 'aprendiz' %}
+                                    <div class="actions-group">
+                                        <a class="btn-outline" href="{% url 'projects:evaluacion_update' item.id %}">Editar</a>
+                                        <form method="post" action="{% url 'projects:evaluacion_delete' item.id %}" class="inline-form">
+                                            {% csrf_token %}
+                                            <button class="btn-link" type="submit">Eliminar</button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <details class="observation-details">
+                                        <summary class="btn-outline">Ver observación</summary>
+                                        <div class="observation-box">
+                                            {{ item.observaciones|default:"Sin observación registrada." }}
+                                        </div>
+                                    </details>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="9" class="empty-state">
+                                {% if current_usuario.rol.nombre_rol|lower == 'aprendiz' %}
+                                    Aun no tienes calificaciones registradas. Cuando un instructor califique tu entregable o tu equipo Scrum, apareceran aqui.
+                                {% else %}
+                                    No hay calificaciones registradas. Usa la opcion Calificar entregable para que el aprendiz pueda consultar su nota.
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

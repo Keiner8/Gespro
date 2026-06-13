@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Equipos Scrum | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-instructor">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Equipos Scrum</h1>
+                <span class="page-meta">{{ equipos|length }} registros visibles</span>
+            </div>
+            {% if current_usuario.rol.nombre_rol|lower != 'aprendiz' %}
+                <a class="btn" href="{% url 'academic:gaes_create' %}">Nuevo equipo</a>
+            {% endif %}
+        </div>
+        {% if current_usuario.rol.nombre_rol|lower == 'instructor' %}
+            <div class="dashboard-highlight-grid">
+                {% for resumen in ficha_resumenes %}
+                    <article class="dashboard-highlight role-instructor-accent">
+                        <span class="dashboard-highlight-label">Ficha {{ resumen.ficha.codigo_ficha }}</span>
+                        <strong>{{ resumen.equipos_count }} Scrum</strong>
+                        <p>{{ resumen.aprendices_count }} aprendices vinculados a esta ficha.</p>
+                        <div class="cell-stack form-offset-top">
+                            <span class="cell-main">{{ resumen.ficha.programa_formacion }}</span>
+                            <span class="cell-sub">{{ resumen.ficha.jornada }} · {{ resumen.ficha.estado }}</span>
+                        </div>
+                        <div class="summary-chips">
+                            {% for equipo in resumen.equipos %}
+                                <span class="summary-chip">{{ equipo.nombre }}</span>
+                            {% empty %}
+                                <span class="summary-chip summary-chip-muted">Sin equipos creados</span>
+                            {% endfor %}
+                        </div>
+                        <div class="summary-members scrum-breakdown">
+                            <strong>Integrantes por Scrum</strong>
+                            {% for detalle in resumen.equipos_detalle %}
+                                <details class="scrum-breakdown-item">
+                                    <summary>
+                                        <span class="summary-chip">{{ detalle.equipo.nombre }}</span>
+                                        <span class="summary-chip summary-chip-muted">{{ detalle.integrantes_count }} aprendices</span>
+                                    </summary>
+                                    <div class="summary-chips">
+                                        {% for aprendiz in detalle.integrantes %}
+                                            <span class="summary-chip summary-chip-soft">{{ aprendiz.usuario.nombre }} {{ aprendiz.usuario.apellido }}</span>
+                                        {% empty %}
+                                            <span class="summary-chip summary-chip-muted">Sin aprendices en este Scrum</span>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+                            {% empty %}
+                                <span class="summary-chip summary-chip-muted">Sin equipos creados</span>
+                            {% endfor %}
+                            {% if resumen.aprendices_sin_scrum %}
+                                <details class="scrum-breakdown-item">
+                                    <summary>
+                                        <span class="summary-chip summary-chip-muted">Sin Scrum asignado</span>
+                                        <span class="summary-chip summary-chip-muted">{{ resumen.aprendices_sin_scrum|length }} aprendices</span>
+                                    </summary>
+                                    <div class="summary-chips">
+                                        {% for aprendiz in resumen.aprendices_sin_scrum %}
+                                            <span class="summary-chip summary-chip-soft">{{ aprendiz.usuario.nombre }} {{ aprendiz.usuario.apellido }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% empty %}
+                    <article class="dashboard-highlight role-instructor-accent">
+                        <span class="dashboard-highlight-label">Sin fichas</span>
+                        <strong>0</strong>
+                        <p>Aun no tienes fichas asignadas dentro del sistema.</p>
+                    </article>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Ficha</th>
+                        {% if current_usuario.rol.nombre_rol|lower == 'aprendiz' %}
+                            <th>Programa</th>
+                        {% endif %}
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in equipos %}
+                        <tr>
+                            <td class="cell-main">{{ item.nombre }}</td>
+                            <td>{{ item.ficha.codigo_ficha }}</td>
+                            {% if current_usuario.rol.nombre_rol|lower == 'aprendiz' %}
+                                <td>{{ item.ficha.programa_formacion }}</td>
+                            {% endif %}
+                            <td>
+                                {% if current_usuario.rol.nombre_rol|lower == 'aprendiz' %}
+                                    <span class="status-badge activo">Consulta</span>
+                                {% else %}
+                                    <div class="actions-group">
+                                        <a class="btn-outline" href="{% url 'academic:gaes_update' item.id %}">Editar</a>
+                                        <form method="post" action="{% url 'academic:gaes_delete' item.id %}" class="inline-form">
+                                            {% csrf_token %}
+                                            <button class="btn-link" type="submit">Eliminar</button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% if current_usuario.rol.nombre_rol|lower == 'aprendiz' %}
+                            <tr class="scrum-members-row">
+                                <td colspan="4">
+                                    <div class="scrum-members-panel">
+                                        <strong>Compañeros del Scrum</strong>
+                                        <div class="summary-chips">
+                                            {% for link in item.aprendiz_links.all %}
+                                                <span class="summary-chip {% if aprendiz_actual and link.aprendiz_id == aprendiz_actual.id %}summary-chip-current{% else %}summary-chip-soft{% endif %}">
+                                                    {{ link.aprendiz.usuario.nombre }} {{ link.aprendiz.usuario.apellido }}
+                                                    {% if aprendiz_actual and link.aprendiz_id == aprendiz_actual.id %}(tu){% endif %}
+                                                </span>
+                                            {% empty %}
+                                                <span class="summary-chip summary-chip-muted">Aun no hay aprendices asociados a este Scrum.</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% empty %}
+                        <tr><td colspan="{% if current_usuario.rol.nombre_rol|lower == 'aprendiz' %}4{% else %}3{% endif %}" class="empty-state">No hay equipos registrados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

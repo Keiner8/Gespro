@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Registrarse | GESPRO{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block content %}
+<section class="auth-shell auth-shell-register">
+    <div class="auth-card auth-card-wide auth-card-register auth-register-split-card">
+        <aside class="auth-register-brand-panel" aria-label="Marca GESPRO">
+            <div class="auth-register-logo-frame">
+                <img src="{% static 'img/logo3.png' %}" alt="GESPRO">
+            </div>
+            <span class="auth-login-pill">Nuevo acceso</span>
+            <h2>GESPRO</h2>
+        </aside>
+
+        <div class="auth-register-form-panel">
+            <h1 class="page-title register-title">Regístrate</h1>
+
+        <form method="post" class="form-grid form-offset-top register-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-errors-summary full-span">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="form-field">
+                <label for="{{ form.nombre.id_for_label }}">Nombre <span class="required-mark">*</span></label>
+                {{ form.nombre }}
+                {% if form.nombre.errors %}
+                    <ul class="field-errors">{% for error in form.nombre.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.apellido.id_for_label }}">Apellido <span class="required-mark">*</span></label>
+                {{ form.apellido }}
+                {% if form.apellido.errors %}
+                    <ul class="field-errors">{% for error in form.apellido.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.correo.id_for_label }}">Correo electrónico <span class="required-mark">*</span></label>
+                {{ form.correo }}
+                {% if form.correo.errors %}
+                    <ul class="field-errors" data-live-server-error="correo">{% for error in form.correo.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.tipo_documento.id_for_label }}">Tipo de documento <span class="required-mark">*</span></label>
+                {{ form.tipo_documento }}
+                {% if form.tipo_documento.errors %}
+                    <ul class="field-errors">{% for error in form.tipo_documento.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.numero_documento.id_for_label }}">Número de documento <span class="required-mark">*</span></label>
+                {{ form.numero_documento }}
+                <div class="check-hint-group" aria-live="polite">
+                    <div class="check-hint is-neutral" data-doc-rule="length">
+                        <span class="check-dot"></span>
+                        <span>Debe tener entre 6 y 10 dígitos numéricos.</span>
+                    </div>
+                </div>
+                {% if form.numero_documento.errors %}
+                    <ul class="field-errors" data-live-server-error="numero_documento">{% for error in form.numero_documento.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.password.id_for_label }}">Contraseña <span class="required-mark">*</span></label>
+                <div class="password-field">
+                    {{ form.password }}
+                    <button class="password-toggle" type="button" data-password-toggle="{{ form.password.id_for_label }}" aria-label="Mostrar contraseña" title="Mostrar contraseña">
+                        <span class="eye-icon eye-icon-off" aria-hidden="true" data-eye-icon></span>
+                    </button>
+                </div>
+                <div class="check-hint-group" aria-live="polite">
+                    <div class="check-hint is-neutral" data-password-rule="length">
+                        <span class="check-dot"></span>
+                        <span>Mínimo 8 caracteres.</span>
+                    </div>
+                    <div class="check-hint is-neutral" data-password-rule="uppercase">
+                        <span class="check-dot"></span>
+                        <span>Incluye una mayúscula.</span>
+                    </div>
+                    <div class="check-hint is-neutral" data-password-rule="lowercase">
+                        <span class="check-dot"></span>
+                        <span>Incluye una minúscula.</span>
+                    </div>
+                    <div class="check-hint is-neutral" data-password-rule="digit">
+                        <span class="check-dot"></span>
+                        <span>Incluye un número.</span>
+                    </div>
+                    <div class="check-hint is-neutral" data-password-rule="symbol">
+                        <span class="check-dot"></span>
+                        <span>Incluye un símbolo.</span>
+                    </div>
+                </div>
+                {% if form.password.errors %}
+                    <ul class="field-errors">{% for error in form.password.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+            <div class="form-field register-confirm-field">
+                <label for="{{ form.password_confirm.id_for_label }}">Confirmar contraseña <span class="required-mark">*</span></label>
+                <div class="password-field">
+                    {{ form.password_confirm }}
+                    <button class="password-toggle" type="button" data-password-toggle="{{ form.password_confirm.id_for_label }}" aria-label="Mostrar contraseña" title="Mostrar contraseña">
+                        <span class="eye-icon eye-icon-off" aria-hidden="true" data-eye-icon></span>
+                    </button>
+                </div>
+                {% if form.password_confirm.errors %}
+                    <ul class="field-errors">{% for error in form.password_confirm.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+            <div class="form-actions register-submit-cell">
+                <button class="btn btn-register-submit" type="submit">Registrarme</button>
+            </div>
+        </form>
+
+            <div class="auth-links auth-links-register">
+                <a class="auth-login-link" href="{% url 'accounts:login' %}">
+                    <strong class="auth-login-question">¿Ya tienes cuenta?</strong>
+                    <span>Inicia sesión</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
+    const documentInput = document.getElementById('{{ form.numero_documento.id_for_label }}');
+    const emailInput = document.getElementById('{{ form.correo.id_for_label }}');
+
+    const passwordRules = {
+        length: value => value.length >= 8,
+        uppercase: value => /[A-ZÁÉÍÓÚÜÑ]/.test(value),
+        lowercase: value => /[a-záéíóúüñ]/.test(value),
+        digit: value => /\d/.test(value),
+        symbol: value => /[^A-Za-z0-9áéíóúüñÁÉÍÓÚÜÑ]/.test(value),
+    };
+
+    function setState(element, valid) {
+        element.classList.remove('is-neutral', 'is-valid', 'is-invalid');
+        if (valid === null) {
+            element.classList.add('is-neutral');
+        } else if (valid) {
+            element.classList.add('is-valid');
+        } else {
+            element.classList.add('is-invalid');
+        }
+    }
+
+    function updatePasswordChecklist() {
+        if (!passwordInput) return;
+        const value = passwordInput.value || '';
+        document.querySelectorAll('[data-password-rule]').forEach((item) => {
+            const ruleName = item.getAttribute('data-password-rule');
+            if (!value) {
+                setState(item, null);
+                return;
+            }
+            setState(item, passwordRules[ruleName](value));
+        });
+    }
+
+    function updateDocumentChecklist() {
+        if (!documentInput) return;
+        const cleanValue = (documentInput.value || '').replace(/\D/g, '').slice(0, 10);
+        if (documentInput.value !== cleanValue) {
+            documentInput.value = cleanValue;
+        }
+        const value = cleanValue.trim();
+        document.querySelectorAll('[data-doc-rule]').forEach((item) => {
+            if (!value) {
+                setState(item, null);
+                return;
+            }
+            setState(item, /^\d{6,10}$/.test(value));
+        });
+    }
+
+    function clearServerError(fieldName) {
+        const serverError = document.querySelector(`[data-live-server-error="${fieldName}"]`);
+        if (serverError) {
+            serverError.remove();
+        }
+    }
+
+    if (passwordInput) {
+        passwordInput.addEventListener('input', updatePasswordChecklist);
+        updatePasswordChecklist();
+    }
+
+    document.querySelectorAll('[data-password-toggle]').forEach(function (button) {
+        const input = document.getElementById(button.dataset.passwordToggle);
+        if (!input) return;
+
+        button.addEventListener('click', function () {
+            const isHidden = input.type === 'password';
+            const icon = button.querySelector('[data-eye-icon]');
+            input.type = isHidden ? 'text' : 'password';
+            button.setAttribute('aria-label', isHidden ? 'Ocultar contraseña' : 'Mostrar contraseña');
+            button.setAttribute('title', isHidden ? 'Ocultar contraseña' : 'Mostrar contraseña');
+            button.classList.toggle('is-visible', isHidden);
+            if (icon) {
+                icon.classList.toggle('eye-icon-on', isHidden);
+                icon.classList.toggle('eye-icon-off', !isHidden);
+            }
+        });
+    });
+
+    if (documentInput) {
+        documentInput.addEventListener('beforeinput', function (event) {
+            if (event.data && /\D/.test(event.data)) {
+                event.preventDefault();
+            }
+        });
+        documentInput.addEventListener('input', function () {
+            clearServerError('numero_documento');
+            updateDocumentChecklist();
+        });
+        documentInput.addEventListener('paste', function () {
+            setTimeout(updateDocumentChecklist, 0);
+        });
+        updateDocumentChecklist();
+    }
+
+    if (emailInput) {
+        emailInput.addEventListener('input', function () {
+            clearServerError('correo');
+        });
+    }
+});
+</script>
+{% endblock %}

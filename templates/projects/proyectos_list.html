@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Proyectos | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-instructor">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Proyectos</h1>
+                <span class="page-meta">{{ proyectos|length }} registros visibles</span>
+            </div>
+            <a class="btn" href="{% url 'projects:proyecto_create' %}">Nuevo proyecto</a>
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Proyecto</th>
+                        <th>Equipo</th>
+                        <th>Estado</th>
+                        <th>Fechas</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in proyectos %}
+                        <tr>
+                            <td>
+                                <div class="cell-stack">
+                                    <span class="cell-main">{{ item.nombre }}</span>
+                                    <span class="cell-sub">{{ item.descripcion|default:"Sin descripcion" }}</span>
+                                </div>
+                            </td>
+                            <td>{{ item.gaes.nombre }}</td>
+                            <td><span class="status-badge {{ item.estado|lower }}">{{ item.estado }}</span></td>
+                            <td>{{ item.fecha_inicio }} - {{ item.fecha_fin }}</td>
+                            <td>
+                                <div class="actions-group">
+                                    <a class="btn-outline" href="{% url 'projects:proyecto_update' item.id %}">Editar</a>
+                                    {% if current_usuario.rol.nombre_rol|lower != 'aprendiz' %}
+                                        <form method="post" action="{% url 'projects:proyecto_delete' item.id %}" class="inline-form">
+                                            {% csrf_token %}
+                                            <button class="btn-link" type="submit">Eliminar</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5" class="empty-state">No hay proyectos registrados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-admin form-shell">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">{{ title }}</h1>
+            </div>
+        </div>
+        <form method="post" enctype="multipart/form-data" class="form-grid">
+            {% csrf_token %}
+            {% include "includes/form_fields.html" with form=form %}
+            <div class="form-actions">
+                <button class="btn" type="submit">Guardar</button>
+                <a class="btn-secondary" href="{% url 'dashboards:home' %}">Volver</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('select[data-ficha-filter="true"]').forEach(function (select) {
+            const search = document.createElement('input');
+            const options = Array.from(select.options).map(function (option) {
+                return {
+                    value: option.value,
+                    text: option.textContent,
+                    selected: option.selected,
+                    disabled: option.disabled
+                };
+            });
+
+            search.type = 'search';
+            search.className = 'ficha-search-input';
+            search.placeholder = 'Buscar ficha por codigo o programa...';
+            search.setAttribute('aria-label', 'Buscar ficha por codigo o programa');
+            select.parentNode.insertBefore(search, select);
+
+            search.addEventListener('input', function () {
+                const query = search.value.trim().toLowerCase();
+                const currentValue = select.value;
+                select.innerHTML = '';
+
+                options.forEach(function (optionData) {
+                    const isEmptyOption = optionData.value === '';
+                    const matches = optionData.text.toLowerCase().includes(query);
+                    if (!isEmptyOption && query && !matches) {
+                        return;
+                    }
+
+                    const option = document.createElement('option');
+                    option.value = optionData.value;
+                    option.textContent = optionData.text;
+                    option.disabled = optionData.disabled;
+                    option.selected = optionData.value === currentValue;
+                    select.appendChild(option);
+                });
+
+                if (!Array.from(select.options).some(function (option) {
+                    return option.value === currentValue;
+                })) {
+                    select.value = '';
+                }
+                select.dispatchEvent(new Event('change'));
+            });
+        });
+
+        const fichaSelect = document.querySelector('select[name="ficha"]');
+        const trimestreSelect = document.querySelector('select[data-trimestre-filter="true"]');
+        if (!fichaSelect || !trimestreSelect) {
+            return;
+        }
+
+        const trimestreOptions = Array.from(trimestreSelect.options).map(function (option) {
+            return {
+                value: option.value,
+                text: option.textContent,
+                fichaId: option.dataset.fichaId || '',
+                disponible: option.dataset.disponible !== 'false',
+                selected: option.selected
+            };
+        });
+
+        function filterTrimestres() {
+            const fichaId = fichaSelect.value;
+            const currentValue = trimestreSelect.value;
+            trimestreSelect.innerHTML = '';
+
+            trimestreOptions.forEach(function (optionData) {
+                if (optionData.value && optionData.fichaId !== fichaId) {
+                    return;
+                }
+
+                const option = document.createElement('option');
+                option.value = optionData.value;
+                option.textContent = optionData.text;
+                option.dataset.fichaId = optionData.fichaId;
+                option.dataset.disponible = optionData.disponible ? 'true' : 'false';
+                option.disabled = !optionData.disponible;
+                option.selected = optionData.value === currentValue;
+                trimestreSelect.appendChild(option);
+            });
+
+            if (!Array.from(trimestreSelect.options).some(function (option) {
+                return option.value === currentValue && !option.disabled;
+            })) {
+                trimestreSelect.value = '';
+            }
+        }
+
+        fichaSelect.addEventListener('change', filterTrimestres);
+        filterTrimestres();
+    });
+</script>
+{% endblock %}

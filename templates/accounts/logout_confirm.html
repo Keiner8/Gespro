@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Cerrar sesión | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card logout-confirm-card">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Cerrar sesión</h1>
+                <p class="page-subtitle">¿Estás seguro de que quieres cerrar sesión?</p>
+            </div>
+        </div>
+        <div class="form-actions">
+            <form method="post" class="inline-form">
+                {% csrf_token %}
+                <button class="btn btn-danger" type="submit">Sí, cerrar sesión</button>
+            </form>
+            <a class="btn-secondary" href="{% url 'dashboards:home' %}">No, volver</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

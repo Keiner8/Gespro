@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-admin form-shell">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">{{ title }}</h1>
+                <p class="page-subtitle">Filtra por ficha y asigna solo aprendices que no pertenecen a otro equipo Scrum.</p>
+            </div>
+        </div>
+
+        <form method="get" class="form-grid evaluation-filter-form">
+            <div>
+                <div class="form-field">
+                    <label for="ficha-filter">Ficha</label>
+                    <select id="ficha-filter" name="ficha">
+                        <option value="">Selecciona una ficha</option>
+                        {% for ficha in fichas %}
+                            <option value="{{ ficha.id }}" {% if ficha.id == selected_ficha_id %}selected{% endif %}>
+                                {{ ficha.codigo_ficha }} - {{ ficha.programa_formacion }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <small class="field-help">Primero selecciona la ficha para ver sus aprendices.</small>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn" type="submit">Filtrar</button>
+                <a class="btn-secondary" href="{{ clear_filters_url }}">Limpiar filtros</a>
+            </div>
+        </form>
+
+        <form method="post" class="form-grid evaluation-save-form">
+            {% csrf_token %}
+            {% include "includes/form_fields.html" with form=form %}
+
+            <div class="full-span">
+                <p class="table-note">
+                    {% if selected_ficha_id %}
+                        Aprendices de la ficha seleccionada: <strong>{{ aprendiz_rows|length }}</strong>.
+                    {% else %}
+                        Selecciona una ficha arriba para ver los aprendices disponibles.
+                    {% endif %}
+                </p>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Asignar</th>
+                                <th>Aprendiz</th>
+                                <th>Documento</th>
+                                <th>Estado Scrum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in aprendiz_rows %}
+                                <tr>
+                                    <td>
+                                        {% if row.bloqueado %}
+                                            <span class="status-badge inactivo">No disponible</span>
+                                        {% else %}
+                                            <input type="checkbox" name="aprendices" value="{{ row.aprendiz.id }}" {% if row.pertenece_actual %}checked{% endif %}>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ row.aprendiz.usuario.nombre }} {{ row.aprendiz.usuario.apellido }}</td>
+                                    <td>{{ row.aprendiz.usuario.numero_documento }}</td>
+                                    <td>
+                                        {% if row.bloqueado %}
+                                            <span class="cell-sub">Ya pertenece a {{ row.equipo_actual.nombre }}. No puede ingresarse a otro Scrum.</span>
+                                        {% elif row.pertenece_actual %}
+                                            <span class="status-badge activo">En este Scrum</span>
+                                        {% else %}
+                                            <span class="status-badge pendiente">Disponible</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="4" class="empty-state">No hay aprendices para mostrar en esta ficha.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn" type="submit">Guardar</button>
+                <a class="btn-secondary" href="{% url 'academic:gaes_list' %}">Volver</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

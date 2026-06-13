@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Reportes | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-admin">
+        <div class="report-hero">
+            <img src="{% static 'img/logo3.png' %}" alt="GESPRO" class="report-logo">
+            <div class="report-hero-copy">
+                <h1 class="page-title">Reportes</h1>
+                <span>Generado: {{ generated_at|date:"d/m/Y h:i A" }}</span>
+            </div>
+        </div>
+
+        <form method="get" class="report-filter-card">
+            <div class="report-filter-grid">
+                <div class="form-field">
+                    <label for="tipo">Tipo de reporte</label>
+                    <select name="tipo" id="tipo">
+                        <option value="usuarios" {% if report_name == 'usuarios' %}selected{% endif %}>Usuarios</option>
+                        <option value="aprendices" {% if report_name == 'aprendices' %}selected{% endif %}>Aprendices</option>
+                        <option value="instructores" {% if report_name == 'instructores' %}selected{% endif %}>Instructores</option>
+                        <option value="fichas" {% if report_name == 'fichas' %}selected{% endif %}>Fichas</option>
+                        <option value="trimestres" {% if report_name == 'trimestres' %}selected{% endif %}>Trimestres</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="q">Buscar</label>
+                    <input type="search" name="q" id="q" value="{{ filters.q }}" placeholder="Buscar en reporte...">
+                </div>
+                {% if report_name == 'usuarios' %}
+                    <div class="form-field">
+                        <label for="rol">Rol</label>
+                        <select name="rol" id="rol">
+                            <option value="">Todos los roles</option>
+                            {% for rol in role_options %}
+                                <option value="{{ rol }}" {% if filters.rol == rol %}selected{% endif %}>{{ rol|title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+                {% if report_name == 'usuarios' %}
+                    <div class="form-field">
+                        <label for="estado">Estado</label>
+                        <select name="estado" id="estado">
+                            <option value="">Todos los estados</option>
+                            {% for value,label in user_state_options %}
+                                <option value="{{ value }}" {% if filters.estado == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% elif report_name == 'fichas' %}
+                    <div class="form-field">
+                        <label for="estado">Estado</label>
+                        <select name="estado" id="estado">
+                            <option value="">Todos los estados</option>
+                            {% for value,label in ficha_state_options %}
+                                <option value="{{ value }}" {% if filters.estado == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% elif report_name == 'trimestres' %}
+                    <div class="form-field">
+                        <label for="estado">Estado</label>
+                        <select name="estado" id="estado">
+                            <option value="">Todos los estados</option>
+                            {% for value,label in ficha_state_options %}
+                                <option value="{{ value }}" {% if filters.estado == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+                {% if report_name == 'aprendices' or report_name == 'instructores' or report_name == 'trimestres' %}
+                    <div class="form-field">
+                        <label for="ficha">Ficha</label>
+                        <select name="ficha" id="ficha">
+                            <option value="">Todas las fichas</option>
+                            {% for ficha in ficha_options %}
+                                <option value="{{ ficha.id }}" {% if filters.ficha == ficha.id|stringformat:"s" %}selected{% endif %}>{{ ficha.codigo_ficha }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+                <div class="form-actions">
+                    <button class="btn" type="submit">Consultar</button>
+                    <a class="report-action report-action-excel" href="{% url 'dashboards:reportes_export_excel' report_name %}{% if export_query %}?{{ export_query }}{% endif %}">Descargar Excel</a>
+                    <a class="report-action report-action-pdf" href="{% url 'dashboards:reportes_export_pdf' report_name %}{% if export_query %}?{{ export_query }}{% endif %}">Descargar PDF</a>
+                </div>
+            </div>
+        </form>
+        <h2 class="chart-title">Vista previa: {{ report_label }}</h2>
+        <div class="table-container">
+            <table class="data-table report-preview-table">
+                <thead>
+                    <tr>
+                        {% for header in headers %}<th>{{ header }}</th>{% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        {% for cell in row %}
+                            <td>
+                                {% if cell == 'activo' %}
+                                    <span class="report-status report-status-active">Activo</span>
+                                {% elif cell == 'inactivo' %}
+                                    <span class="report-status report-status-inactive">Inactivo</span>
+                                {% elif cell == 'activa' %}
+                                    <span class="report-status report-status-active">Activa</span>
+                                {% elif cell == 'inactiva' %}
+                                    <span class="report-status report-status-inactive">Inactiva</span>
+                                {% elif cell == 'en_proceso' %}
+                                    <span class="report-status report-status-process">En proceso</span>
+                                {% elif cell == 'finalizado' %}
+                                    <span class="report-status report-status-active">Finalizado</span>
+                                {% elif cell == 'cancelado' %}
+                                    <span class="report-status report-status-inactive">Cancelado</span>
+                                {% else %}
+                                    {{ cell }}
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="{{ headers|length }}" class="empty-state">No hay datos para este reporte.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

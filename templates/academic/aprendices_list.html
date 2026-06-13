@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Aprendices | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-admin">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Aprendices</h1>
+                <span class="page-meta">{{ aprendices|length }} registros visibles</span>
+            </div>
+            {% if current_usuario.rol.nombre_rol|lower == 'administrador' %}
+                <div class="btn-row">
+                    <a class="btn" href="{% url 'academic:aprendiz_create' %}">Nuevo aprendiz</a>
+                    <a class="btn-secondary" href="{% url 'academic:aprendiz_bulk_upload' %}">Carga masiva</a>
+                </div>
+            {% endif %}
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Aprendiz</th>
+                        <th>Tipo documento</th>
+                        <th>Número documento</th>
+                        <th>Correo</th>
+                        <th>Ficha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in aprendices %}
+                        <tr>
+                            <td>
+                                <div class="cell-stack">
+                                    <span class="cell-main">{{ item.usuario.nombre }} {{ item.usuario.apellido }}</span>
+                                </div>
+                            </td>
+                            <td>{{ item.usuario.tipo_documento }}</td>
+                            <td class="mono-text">{{ item.usuario.numero_documento }}</td>
+                            <td>{{ item.usuario.correo }}</td>
+                            <td>{{ item.ficha.codigo_ficha }}</td>
+                            <td>
+                                {% if current_usuario.rol.nombre_rol|lower == 'administrador' %}
+                                    <div class="actions-group">
+                                        <a class="btn-outline" href="{% url 'academic:aprendiz_update' item.id %}">Editar</a>
+                                        <form method="post" action="{% url 'academic:aprendiz_delete' item.id %}" class="inline-form">
+                                            {% csrf_token %}
+                                            <button class="btn-link" type="submit">Eliminar</button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <span class="status-badge activo">Consulta</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="6" class="empty-state">No hay aprendices registrados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

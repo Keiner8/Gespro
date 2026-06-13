@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}{% if current_usuario.rol.nombre_rol|lower == 'instructor' %}Fichas a cargo{% elif current_usuario.rol.nombre_rol|lower == 'aprendiz' %}Mi ficha{% else %}Fichas{% endif %} | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-admin">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">{% if current_usuario.rol.nombre_rol|lower == 'instructor' %}Fichas a cargo{% elif current_usuario.rol.nombre_rol|lower == 'aprendiz' %}Mi ficha{% else %}Fichas{% endif %}</h1>
+                <span class="page-meta">{{ fichas|length }} registros visibles</span>
+            </div>
+            {% if current_usuario.rol.nombre_rol|lower == 'administrador' %}
+                <a class="btn" href="{% url 'academic:ficha_create' %}">Nueva ficha</a>
+            {% endif %}
+        </div>
+        {% if current_usuario.rol.nombre_rol|lower == 'instructor' %}
+            <div class="dashboard-highlight-grid ficha-card-grid">
+                {% for resumen in ficha_resumenes %}
+                    <article class="dashboard-highlight role-instructor-accent ficha-summary-card">
+                        <div class="ficha-card-top">
+                            <span class="dashboard-highlight-label">Ficha a cargo</span>
+                            <span class="status-badge {{ resumen.ficha.estado|lower }}">{{ resumen.ficha.estado }}</span>
+                        </div>
+                        <strong>Ficha {{ resumen.ficha.codigo_ficha }}</strong>
+                        <p>{{ resumen.ficha.programa_formacion }}</p>
+
+                        <div class="cell-stack form-offset-top">
+                            <span class="cell-main">{{ resumen.aprendices_count }} aprendices vinculados</span>
+                            <span class="cell-sub">{{ resumen.ficha.modalidad }} · {{ resumen.ficha.nivel }} · {{ resumen.ficha.jornada }}</span>
+                        </div>
+                        <div class="summary-chips">
+                            <span class="summary-chip">{{ resumen.equipos_count }} Scrum</span>
+                            <span class="summary-chip summary-chip-muted">Inicio {{ resumen.ficha.fecha_inicio|date:"d/m/Y" }}</span>
+                            <span class="summary-chip summary-chip-muted">Fin {{ resumen.ficha.fecha_fin|date:"d/m/Y" }}</span>
+                        </div>
+
+                        <div class="summary-members">
+                            <strong>Equipos Scrum</strong>
+                            <div class="summary-chips">
+                                {% for equipo in resumen.equipos %}
+                                    <span class="summary-chip">{{ equipo.nombre }}</span>
+                                {% empty %}
+                                    <span class="summary-chip summary-chip-muted">Sin equipos creados</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <details class="ficha-integrantes-details">
+                            <summary class="btn-outline">Ver integrantes</summary>
+                            <div class="summary-members">
+                                <strong>Aprendices de la ficha</strong>
+                                <div class="summary-chips">
+                                    {% for aprendiz in resumen.aprendices %}
+                                        <span class="summary-chip summary-chip-soft">{{ aprendiz.usuario.nombre }} {{ aprendiz.usuario.apellido }}</span>
+                                    {% empty %}
+                                        <span class="summary-chip summary-chip-muted">Sin aprendices asociados</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </details>
+                    </article>
+                {% empty %}
+                    <article class="dashboard-highlight role-instructor-accent ficha-summary-card">
+                        <span class="dashboard-highlight-label">Sin fichas</span>
+                        <strong>0</strong>
+                        <p>Aún no tienes fichas asignadas dentro del sistema.</p>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Programa</th>
+                        <th>Nivel</th>
+                        <th>Jornada</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in fichas %}
+                        <tr>
+                            <td class="mono-text">{{ item.codigo_ficha }}</td>
+                            <td>
+                                <div class="cell-stack">
+                                    <span class="cell-main">{{ item.programa_formacion }}</span>
+                                    <span class="cell-sub">{{ item.modalidad }}</span>
+                                </div>
+                            </td>
+                            <td>{{ item.nivel }}</td>
+                            <td>{{ item.jornada }}</td>
+                            <td><span class="status-badge {{ item.estado|lower }}">{{ item.estado }}</span></td>
+                            <td>
+                                {% if current_usuario.rol.nombre_rol|lower == 'administrador' %}
+                                    <div class="actions-group">
+                                        <a class="btn-outline" href="{% url 'academic:ficha_update' item.id %}">Editar</a>
+                                        <form method="post" action="{% url 'academic:ficha_delete' item.id %}" class="inline-form">
+                                            {% csrf_token %}
+                                            <button class="btn-link" type="submit">Eliminar</button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <span class="status-badge activo">Consulta</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="6" class="empty-state">No hay fichas registradas.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Evaluación final | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-instructor final-board">
+        <div class="final-hero">
+            <div class="final-hero-copy">
+                <span class="final-eyebrow">Cierre académico</span>
+                <h1 class="page-title">Evaluación final</h1>
+            </div>
+            <div class="final-export-actions">
+                <a class="report-download-btn report-download-excel" href="{% url 'projects:evaluacion_final_excel' %}?estado={{ selected_estado }}{% if selected_ficha_id %}&ficha={{ selected_ficha_id }}{% endif %}">
+                    Descargar Excel
+                </a>
+                <a class="report-download-btn report-download-pdf" href="{% url 'projects:evaluacion_final_pdf' %}?estado={{ selected_estado }}{% if selected_ficha_id %}&ficha={{ selected_ficha_id }}{% endif %}">
+                    Descargar PDF
+                </a>
+            </div>
+        </div>
+
+        <div class="final-summary-grid">
+            <article class="final-summary-card final-summary-total">
+                <span>Aprendices</span>
+                <strong>{{ total_aprendices }}</strong>
+            </article>
+            <article class="final-summary-card final-summary-ok">
+                <span>Aprobados</span>
+                <strong>{{ total_aprobados }}</strong>
+            </article>
+            <article class="final-summary-card final-summary-bad">
+                <span>No aprobados</span>
+                <strong>{{ total_no_aprobados }}</strong>
+            </article>
+            <article class="final-summary-card final-summary-wait">
+                <span>Pendientes</span>
+                <strong>{{ total_pendientes }}</strong>
+            </article>
+        </div>
+
+        <div class="final-table-shell">
+            <div class="final-table-head">
+                <div>
+                    <h2>Listado de aprendices</h2>
+                </div>
+                <span class="page-meta">{{ rows|length }} registros visibles</span>
+            </div>
+
+            <form method="get" class="final-filter-bar">
+                <div class="final-filter-field">
+                    <label for="ficha-filter-final">Ficha</label>
+                    <select id="ficha-filter-final" name="ficha">
+                        <option value="">Todas las fichas</option>
+                        {% for ficha in fichas %}
+                            <option value="{{ ficha.id }}" {% if ficha.id == selected_ficha_id %}selected{% endif %}>
+                                {{ ficha.codigo_ficha }} - {{ ficha.programa_formacion }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <a class="final-filter-chip {% if not selected_estado and not selected_ficha_id %}is-active{% endif %}" href="{% url 'projects:evaluacion_final_list' %}">Todos</a>
+                <button class="final-filter-chip {% if selected_estado == 'aprobado' %}is-active{% endif %}" type="submit" name="estado" value="aprobado">Aprobados</button>
+                <button class="final-filter-chip {% if selected_estado == 'no_aprobado' %}is-active{% endif %}" type="submit" name="estado" value="no_aprobado">No aprobados</button>
+                <button class="final-filter-chip {% if selected_estado == 'pendiente' %}is-active{% endif %}" type="submit" name="estado" value="pendiente">Pendientes</button>
+                <button class="final-filter-chip final-filter-apply" type="submit" name="estado" value="{{ selected_estado }}">Aplicar filtro</button>
+            </form>
+
+            <div class="table-container final-table-container">
+                <table class="data-table final-table">
+                    <thead>
+                        <tr>
+                            <th>Aprendiz</th>
+                            <th>Ficha</th>
+                            <th>Trimestre</th>
+                            <th>Estado</th>
+                            <th>Observación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rows %}
+                            <tr>
+                                <td>
+                                    <div class="final-user-cell">
+                                        <span class="final-avatar">{{ row.aprendiz.usuario.nombre|first|upper }}{{ row.aprendiz.usuario.apellido|first|upper }}</span>
+                                        <div class="cell-stack">
+                                            <span class="cell-main">{{ row.aprendiz.usuario.nombre }} {{ row.aprendiz.usuario.apellido }}</span>
+                                            <span class="cell-sub">{{ row.aprendiz.usuario.tipo_documento }} {{ row.aprendiz.usuario.numero_documento }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="final-soft-pill">{{ row.aprendiz.ficha.codigo_ficha }}</span></td>
+                                <td>Trimestre {{ row.trimestre.numero }}</td>
+                                <td>
+                                    {% if row.evaluacion_final %}
+                                        <span class="status-badge {% if row.evaluacion_final.estado == 'aprobado' %}activo{% else %}inactivo{% endif %}">
+                                            {{ row.evaluacion_final.get_estado_display }}
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge pendiente">Pendiente</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if row.evaluacion_final.observaciones %}
+                                        {{ row.evaluacion_final.observaciones }}
+                                    {% else %}
+                                        <span class="cell-sub">Sin observación</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="final-actions">
+                                        <form method="post" action="{% url 'projects:evaluacion_final_guardar' row.aprendiz.id row.trimestre.id 'aprobado' %}" class="final-evaluation-form">
+                                            {% csrf_token %}
+                                            <input class="inline-observation-input" type="text" name="observaciones" placeholder="Observación opcional">
+                                            <button class="btn-success" type="submit">Aprobar</button>
+                                        </form>
+                                        <form method="post" action="{% url 'projects:evaluacion_final_guardar' row.aprendiz.id row.trimestre.id 'no_aprobado' %}" class="inline-form">
+                                            {% csrf_token %}
+                                            <button class="btn-danger-solid" type="submit">No aprobar</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="empty-state final-empty-state">
+                                    No tienes aprendices disponibles para evaluación final en tu trimestre asignado.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

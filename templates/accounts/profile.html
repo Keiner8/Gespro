@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Mi perfil | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card {% if current_usuario.rol.nombre_rol|lower == 'instructor' %}role-instructor{% else %}role-aprendiz{% endif %}">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Mi perfil</h1>
+                <p class="page-subtitle">Actualiza tu nombre, correo y foto. Si cambias el correo, el sistema enviará un código de verificación al correo actual registrado.</p>
+            </div>
+        </div>
+
+        <div class="profile-layout">
+            <aside class="profile-summary">
+                <div class="profile-avatar-card">
+                    {% if usuario.foto_perfil %}
+                        <img src="{{ usuario.foto_perfil.url }}" alt="Foto de perfil de {{ usuario.nombre }}">
+                    {% else %}
+                        <span class="profile-avatar-fallback">{{ usuario.nombre|first|upper }}{{ usuario.apellido|first|upper }}</span>
+                    {% endif %}
+                </div>
+                <div class="cell-stack">
+                    <span class="cell-main">{{ usuario.nombre }} {{ usuario.apellido }}</span>
+                    <span class="cell-sub">{{ usuario.rol.nombre_rol }}</span>
+                    <span class="cell-sub">{{ usuario.correo }}</span>
+                </div>
+            </aside>
+
+            <div class="profile-content">
+                <form method="post" enctype="multipart/form-data" class="form-shell form-shell-sm">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="request_update">
+                    <div class="form-grid">
+                        {% include "includes/form_fields.html" with form=profile_form %}
+                        <div class="form-actions">
+                            <button class="btn" type="submit">Solicitar cambios</button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if pending_profile %}
+                    <div class="card form-offset-top">
+                        <div class="page-header">
+                            <div>
+                                <h2 class="chart-title">Confirmar cambios</h2>
+                                <p class="page-subtitle">Revisa el código enviado a tu correo actual y confirma para aplicar la actualización del perfil.</p>
+                            </div>
+                        </div>
+                        <form method="post" class="form-shell form-shell-sm">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="confirm_update">
+                            <div class="form-grid">
+                                {% include "includes/form_fields.html" with form=confirm_form %}
+                                <div class="full-span">
+                                    <div class="table-note">
+                                        Cambios pendientes:
+                                        <strong>{{ pending_profile.nombre }} {{ pending_profile.apellido }}</strong>,
+                                        <strong>{{ pending_profile.correo }}</strong>
+                                        {% if pending_profile.photo_action == 'replace' %}
+                                            y nueva foto de perfil.
+                                        {% elif pending_profile.photo_action == 'remove' %}
+                                            y retiro de la foto actual.
+                                        {% else %}
+                                            sin cambio de foto.
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button class="btn" type="submit">Confirmar actualización</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Instructor | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell instructor-theme-scope">
+    <div class="page-card role-instructor">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Panel del Instructor</h1>
+            </div>
+            <div class="btn-row">
+                <a class="btn" href="{% url 'academic:gaes_list' %}">Equipos Scrum</a>
+                <a class="btn-secondary" href="{% url 'projects:evaluacion_list' %}">Ver calificaciones</a>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card"><span class="stat-label">Ficha a cargo</span><strong class="stat-value">{{ total_fichas }}</strong></div>
+            <div class="stat-card"><span class="stat-label">Aprendices</span><strong class="stat-value">{{ total_aprendices }}</strong></div>
+            <div class="stat-card"><span class="stat-label">Proyectos</span><strong class="stat-value">{{ total_proyectos }}</strong></div>
+            <div class="stat-card"><span class="stat-label">Calificaciones</span><strong class="stat-value">{{ total_evaluaciones }}</strong></div>
+        </div>
+        <div class="dashboard-highlight-grid">
+            <article class="dashboard-highlight role-instructor-accent">
+                <span class="dashboard-highlight-label">Equipos a cargo</span>
+                <strong>{{ total_gaes }}</strong>
+            </article>
+            <article class="dashboard-highlight role-instructor-accent">
+                <span class="dashboard-highlight-label">Entregables con soporte</span>
+                <strong>{{ entregables_con_archivo }}</strong>
+            </article>
+            <article class="dashboard-highlight role-instructor-accent">
+                <span class="dashboard-highlight-label">Avisos pendientes</span>
+                <strong>{{ notificaciones_pendientes }}</strong>
+            </article>
+        </div>
+        <div class="chart-grid">
+            <div class="chart-panel">
+                <h2 class="chart-title">Distribucion de seguimiento</h2>
+                <div class="chart-canvas-wrap">
+                    <canvas id="instructorOverviewChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-panel">
+                <h2 class="chart-title">Estado de proyectos</h2>
+                <div class="chart-canvas-wrap">
+                    <canvas id="instructorProjectsChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-panel chart-panel-wide">
+                <h2 class="chart-title">Progreso de trimestres</h2>
+                <div class="chart-canvas-wrap">
+                    <canvas id="instructorTrimestresChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-panel chart-panel-wide">
+                <h2 class="chart-title">Rendimiento de calificaciones</h2>
+                <div class="chart-canvas-wrap">
+                    <canvas id="instructorEvaluationsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const instructorOverviewCtx = document.getElementById('instructorOverviewChart');
+new Chart(instructorOverviewCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Aprendices', 'Proyectos', 'Evaluaciones'],
+    datasets: [{
+      data: [{{ total_aprendices }}, {{ total_proyectos }}, {{ total_evaluaciones }}],
+      backgroundColor: ['#16a34a', '#2563eb', '#f59e0b']
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false
+  }
+});
+
+const instructorProjectsCtx = document.getElementById('instructorProjectsChart');
+new Chart(instructorProjectsCtx, {
+  type: 'polarArea',
+  data: {
+    labels: ['En proceso', 'Finalizados', 'Cancelados'],
+    datasets: [{
+      data: [{{ project_counts.en_proceso }}, {{ project_counts.finalizado }}, {{ project_counts.cancelado }}],
+      backgroundColor: ['#2563eb', '#22c55e', '#ef4444']
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false
+  }
+});
+
+const instructorTrimestresCtx = document.getElementById('instructorTrimestresChart');
+new Chart(instructorTrimestresCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Activos', 'Finalizados', 'Pendientes'],
+    datasets: [{
+      label: 'Trimestres',
+      data: [{{ trimestre_counts.activo }}, {{ trimestre_counts.finalizado }}, {{ trimestre_counts.pendiente }}],
+      backgroundColor: ['#0ea5e9', '#8b5cf6', '#94a3b8']
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  }
+});
+
+const instructorEvaluationsCtx = document.getElementById('instructorEvaluationsChart');
+new Chart(instructorEvaluationsCtx, {
+  type: 'line',
+  data: {
+    labels: ['Alto desempeno', 'Desempeno medio', 'Por fortalecer'],
+    datasets: [{
+      label: 'Evaluaciones',
+      data: [{{ evaluation_counts.alto }}, {{ evaluation_counts.medio }}, {{ evaluation_counts.bajo }}],
+      borderColor: '#0f766e',
+      backgroundColor: 'rgba(15, 118, 110, 0.12)',
+      fill: true,
+      tension: 0.35
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  }
+});
+</script>
+{% endblock %}

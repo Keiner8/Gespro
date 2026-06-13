@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Vista previa | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-aprendiz preview-board">
+        <div class="preview-toolbar">
+            <div>
+                <span class="final-eyebrow">Vista previa de entregable</span>
+                <h1 class="page-title">{{ item.nombre }}</h1>
+                <p class="page-subtitle">
+                    {% if item.nombre_archivo %}
+                        {{ item.nombre_archivo }}
+                    {% elif item.url %}
+                        {{ item.url }}
+                    {% else %}
+                        Sin archivo disponible
+                    {% endif %}
+                </p>
+            </div>
+            <div class="btn-row">
+                <a class="btn-secondary" href="{% url 'projects:entregable_list' %}">Volver</a>
+                {% if item.nombre_archivo %}
+                    <a class="btn" href="{% url 'projects:entregable_download' item.id %}">Descargar</a>
+                {% elif item.url %}
+                    <a class="btn" href="{{ item.url }}" target="_blank" rel="noopener">Abrir enlace</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="preview-frame">
+            {% if preview_type == 'embed' %}
+                <iframe class="preview-iframe" src="{% url 'projects:entregable_inline' item.id %}" title="Vista previa de {{ item.nombre }}"></iframe>
+            {% elif preview_type == 'image' %}
+                <div class="preview-image-wrap">
+                    <img src="{% url 'projects:entregable_inline' item.id %}" alt="Vista previa de {{ item.nombre }}">
+                </div>
+            {% elif preview_type == 'text' %}
+                <pre class="preview-text">{{ text_content }}</pre>
+            {% elif preview_type == 'docx' %}
+                <article class="preview-docx">
+                    {{ docx_html|safe }}
+                </article>
+            {% elif preview_type == 'url' %}
+                <iframe class="preview-iframe" src="{{ external_url }}" title="Vista previa externa de {{ item.nombre }}"></iframe>
+            {% else %}
+                <div class="preview-empty">
+                    <h2>No hay vista previa disponible para este formato</h2>
+                    <p>El archivo se conserva correctamente en GESPRO. Puedes descargarlo para abrirlo con el programa correspondiente.</p>
+                    {% if item.nombre_archivo %}
+                        <a class="btn" href="{% url 'projects:entregable_download' item.id %}">Descargar archivo</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

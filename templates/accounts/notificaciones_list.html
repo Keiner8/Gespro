@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Notificaciones | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-admin">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Notificaciones</h1>
+                <span class="page-meta">{{ notificaciones|length }} registros visibles</span>
+            </div>
+            <div class="btn-row">
+                <form method="post" action="{% url 'accounts:notificaciones_mark_all' %}" class="inline-form">
+                    {% csrf_token %}
+                    <button class="btn-secondary" type="submit">Marcar todas como leidas</button>
+                </form>
+            </div>
+        </div>
+        <div class="notifications-list">
+            {% for item in notificaciones %}
+                <article class="notification-card {% if not item.leida %}notification-unread{% endif %}">
+                    <div class="notification-meta">
+                        <span class="status-badge {% if item.tipo == 'alerta' %}pendiente{% else %}activo{% endif %}">{{ item.tipo }}</span>
+                        <span>{{ item.creada_en|date:"Y-m-d H:i" }}</span>
+                    </div>
+                    <h2 class="chart-title">{{ item.titulo }}</h2>
+                    <p class="page-subtitle" style="margin-top: 6px;">{{ item.mensaje }}</p>
+                    <div class="actions-group" style="margin-top: 14px;">
+                        <form method="post" action="{% url 'accounts:notificacion_mark_read' item.id %}" class="inline-form">
+                            {% csrf_token %}
+                            <button class="btn-outline" type="submit">
+                                {% if item.url_destino %}Abrir y marcar leida{% else %}Marcar leida{% endif %}
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'accounts:notificacion_delete' item.id %}" class="inline-form">
+                            {% csrf_token %}
+                            <button class="btn-link" type="submit">Eliminar</button>
+                        </form>
+                    </div>
+                </article>
+            {% empty %}
+                <div class="empty-state">No tienes notificaciones registradas.</div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

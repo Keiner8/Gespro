@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Aprendiz | GESPRO{% endblock %}
+{% block content %}
+<section class="page-shell">
+    <div class="page-card role-aprendiz">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Panel del Aprendiz</h1>
+            </div>
+            <div class="btn-row">
+                <a class="btn" href="{% url 'projects:entregable_list' %}">Mis entregables</a>
+                <a class="btn-secondary" href="{% url 'projects:evaluacion_list' %}">Mis calificaciones</a>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card"><span class="stat-label">Proyectos</span><strong class="stat-value">{{ total_proyectos }}</strong></div>
+            <div class="stat-card"><span class="stat-label">Entregables</span><strong class="stat-value">{{ total_entregables }}</strong></div>
+            <div class="stat-card"><span class="stat-label">Calificaciones</span><strong class="stat-value">{{ total_evaluaciones }}</strong></div>
+        </div>
+        <div class="dashboard-highlight-grid">
+            <article class="dashboard-highlight role-aprendiz-accent">
+                <span class="dashboard-highlight-label">Equipos vinculados</span>
+                <strong>{{ total_gaes }}</strong>
+                <p>Equipos o grupos que respaldan tu proceso actual de proyecto.</p>
+            </article>
+            <article class="dashboard-highlight role-aprendiz-accent">
+                <span class="dashboard-highlight-label">Entregables listos</span>
+                <strong>{{ entregables_con_archivo }}</strong>
+                <p>{{ entregables_sin_soporte }} entregables aun necesitan soporte o evidencia.</p>
+            </article>
+            <article class="dashboard-highlight role-aprendiz-accent">
+                <span class="dashboard-highlight-label">Avisos por leer</span>
+                <strong>{{ notificaciones_pendientes }}</strong>
+                <p>Notificaciones activas sobre retroalimentacion, seguimiento y revisiones.</p>
+            </article>
+        </div>
+        <div class="chart-grid">
+            <div class="chart-panel">
+                <h2 class="chart-title">Estado de tu actividad</h2>
+                <div class="chart-canvas-wrap">
+                    <canvas id="aprendizOverviewChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-panel">
+                <h2 class="chart-title">Estado de proyectos</h2>
+                <div class="chart-canvas-wrap">
+                    <canvas id="aprendizProjectsChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-panel chart-panel-wide">
+                <h2 class="chart-title">Calidad de calificaciones recibidas</h2>
+                <div class="chart-canvas-wrap">
+                    <canvas id="aprendizEvaluationsChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-panel chart-panel-wide">
+                <h2 class="chart-title">Soporte de entregables</h2>
+                <div class="chart-canvas-wrap">
+                    <canvas id="aprendizEntregablesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const aprendizOverviewCtx = document.getElementById('aprendizOverviewChart');
+new Chart(aprendizOverviewCtx, {
+  type: 'polarArea',
+  data: {
+    labels: ['Proyectos', 'Entregables', 'Evaluaciones'],
+    datasets: [{
+      data: [{{ total_proyectos }}, {{ total_entregables }}, {{ total_evaluaciones }}],
+      backgroundColor: ['#4a90e2', '#7b68ee', '#22c55e']
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false
+  }
+});
+
+const aprendizProjectsCtx = document.getElementById('aprendizProjectsChart');
+new Chart(aprendizProjectsCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['En proceso', 'Finalizados', 'Cancelados'],
+    datasets: [{
+      data: [{{ project_counts.en_proceso }}, {{ project_counts.finalizado }}, {{ project_counts.cancelado }}],
+      backgroundColor: ['#4a90e2', '#22c55e', '#ef4444'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false
+  }
+});
+
+const aprendizEvaluationsCtx = document.getElementById('aprendizEvaluationsChart');
+new Chart(aprendizEvaluationsCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Alto desempeno', 'Desempeno medio', 'Por fortalecer'],
+    datasets: [{
+      label: 'Evaluaciones',
+      data: [{{ evaluation_counts.alto }}, {{ evaluation_counts.medio }}, {{ evaluation_counts.bajo }}],
+      backgroundColor: ['#0ea5e9', '#8b5cf6', '#f59e0b']
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  }
+});
+
+const aprendizEntregablesCtx = document.getElementById('aprendizEntregablesChart');
+new Chart(aprendizEntregablesCtx, {
+  type: 'line',
+  data: {
+    labels: ['Con soporte', 'Pendientes de soporte'],
+    datasets: [{
+      label: 'Entregables',
+      data: [{{ entregables_con_archivo }}, {{ entregables_sin_soporte }}],
+      borderColor: '#2563eb',
+      backgroundColor: 'rgba(37, 99, 235, 0.12)',
+      fill: true,
+      tension: 0.35
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  }
+});
+</script>
+{% endblock %}
