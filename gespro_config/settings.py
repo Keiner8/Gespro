@@ -37,6 +37,14 @@ def env_list(name: str, default: str = '') -> list[str]:
     return [value.strip() for value in os.getenv(name, default).split(',') if value.strip()]
 
 
+def append_unique(values: list[str], *items: str) -> list[str]:
+    for item in items:
+        item = item.strip()
+        if item and item not in values:
+            values.append(item)
+    return values
+
+
 def database_config() -> dict[str, str]:
     database_url = os.getenv('DATABASE_URL', '').strip()
     if database_url:
@@ -66,10 +74,18 @@ if not DEBUG and not SECRET_KEY:
     raise ImproperlyConfigured('SECRET_KEY debe estar configurada en produccion.')
 
 ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1' if DEBUG else '')
+append_unique(
+    ALLOWED_HOSTS,
+    os.getenv('RAILWAY_PUBLIC_DOMAIN', ''),
+    os.getenv('RAILWAY_STATIC_URL', '').removeprefix('https://').removeprefix('http://'),
+)
 if not DEBUG and (not ALLOWED_HOSTS or '*' in ALLOWED_HOSTS):
     raise ImproperlyConfigured('ALLOWED_HOSTS debe listar dominios concretos en produccion.')
 
 CSRF_TRUSTED_ORIGINS = env_list('CSRF_TRUSTED_ORIGINS')
+railway_public_domain = os.getenv('RAILWAY_PUBLIC_DOMAIN', '').strip()
+if railway_public_domain:
+    append_unique(CSRF_TRUSTED_ORIGINS, f'https://{railway_public_domain}')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
