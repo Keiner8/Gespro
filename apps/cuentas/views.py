@@ -6,6 +6,7 @@ Primer bloque migrado a Django puro:
 - CRUD server-side de usuarios para administrador
 """
 
+import logging
 from datetime import datetime, timedelta
 from functools import wraps
 from pathlib import Path
@@ -52,6 +53,7 @@ LOGIN_RATE_LIMIT_ATTEMPTS = 5
 LOGIN_RATE_LIMIT_SECONDS = 5 * 60
 PASSWORD_RECOVERY_RATE_LIMIT_ATTEMPTS = 5
 PASSWORD_RECOVERY_RATE_LIMIT_SECONDS = 15 * 60
+logger = logging.getLogger(__name__)
 
 
 def _format_countdown_label(seconds: int) -> str:
@@ -313,7 +315,15 @@ def password_recovery_request(request: HttpRequest) -> HttpResponse:
             messages.success(request, 'Si el correo esta registrado, enviaremos un código de recuperación.')
         else:
             _record_rate_limit_attempt(rate_key, PASSWORD_RECOVERY_RATE_LIMIT_SECONDS)
-            send_password_reset_code(usuario)
+            try:
+                send_password_reset_code(usuario)
+            except Exception:
+                logger.exception('No se pudo enviar el codigo de recuperacion.')
+                messages.error(
+                    request,
+                    'No pudimos enviar el codigo de recuperacion. Revisa la configuracion del correo e intenta nuevamente.',
+                )
+                return render(request, 'accounts/password_recovery_request.html', {'form': form, 'force_public_layout': True})
             request.session['password_reset_correo'] = usuario.correo
             expires_at = timezone.now() + timedelta(seconds=PASSWORD_RESET_CODE_TTL)
             request.session['password_reset_expires_at'] = expires_at.isoformat()

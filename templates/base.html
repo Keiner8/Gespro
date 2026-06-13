@@ -281,15 +281,6 @@
                 const messageItems = Array.from(document.querySelectorAll('.messages-swal-source li'));
                 const logoutLinks = Array.from(document.querySelectorAll('[data-logout-confirm="true"]'));
 
-                function getCookie(name) {
-                    const value = `; ${document.cookie}`;
-                    const parts = value.split(`; ${name}=`);
-                    if (parts.length === 2) {
-                        return parts.pop().split(';').shift();
-                    }
-                    return '';
-                }
-
                 async function showMessages() {
                     for (const item of messageItems) {
                         const tags = item.dataset.messageTags || '';
@@ -338,7 +329,7 @@
                             form.action = link.href;
                             csrfInput.type = 'hidden';
                             csrfInput.name = 'csrfmiddlewaretoken';
-                            csrfInput.value = getCookie('csrftoken');
+                            csrfInput.value = '{{ csrf_token }}';
                             form.appendChild(csrfInput);
                             document.body.appendChild(form);
                             form.submit();
