@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from apps.cuentas.media_views import media_file
 from apps.paneles.views import ping
 
 urlpatterns = [
@@ -14,6 +15,7 @@ urlpatterns = [
     path('academic/', include('apps.academico.urls')),
     path('projects/', include('apps.proyectos.urls')),
     path('assistant/', include('apps.asistente.urls')),
+    path('media/<path:path>', media_file, name='media_file'),
 ]
 
 if settings.DEBUG:

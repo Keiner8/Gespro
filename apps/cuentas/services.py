@@ -1,6 +1,7 @@
 """Utilidades compartidas del modulo de cuentas."""
 
 import random
+from datetime import date
 from datetime import timedelta
 from email.mime.image import MIMEImage
 
@@ -35,6 +36,24 @@ def ensure_default_roles() -> None:
     defaults = {1: 'administrador', 2: 'instructor', 3: 'aprendiz'}
     for role_id, nombre in defaults.items():
         Rol.objects.update_or_create(id=role_id, defaults={'nombre_rol': nombre})
+
+
+def ensure_default_ficha():
+    from apps.academico.models import Ficha
+
+    ficha, _created = Ficha.objects.get_or_create(
+        codigo_ficha='SIN-ASIGNAR',
+        defaults={
+            'programa_formacion': 'Pendiente de asignacion',
+            'nivel': Ficha.Nivel.TECNICO,
+            'jornada': Ficha.Jornada.MIXTA,
+            'modalidad': Ficha.Modalidad.MIXTA,
+            'fecha_inicio': date.today(),
+            'fecha_fin': date.today(),
+            'estado': Ficha.Estado.ACTIVA,
+        },
+    )
+    return ficha
 
 
 def validate_unique_usuario_fields(correo: str, numero_documento: str, exclude_user_id: int | None = None) -> str | None:
@@ -242,6 +261,6 @@ def create_profile_for_role(usuario: Usuario) -> None:
         if not Instructor.objects.filter(usuario=usuario).exists():
             Instructor.objects.create(usuario=usuario)
     elif rol_nombre == 'aprendiz':
-        ficha = Ficha.objects.order_by('id').first()
+        ficha = Ficha.objects.order_by('id').first() or ensure_default_ficha()
         if ficha and not Aprendiz.objects.filter(usuario=usuario).exists():
             Aprendiz.objects.create(usuario=usuario, ficha=ficha)
