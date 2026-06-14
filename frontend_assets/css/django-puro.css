@@ -1897,6 +1897,20 @@ a {
     border-bottom: 0;
 }
 
+.trimestres-table .trimestre-extra-row.is-hidden {
+    display: none;
+}
+
+.table-more-actions {
+    display: flex;
+    justify-content: center;
+    padding: 18px 0 2px;
+}
+
+.table-more-actions .btn-secondary {
+    min-width: 190px;
+}
+
 .usuarios-table {
     table-layout: fixed;
     min-width: 980px;

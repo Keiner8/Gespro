@@ -13,7 +13,7 @@
             {% endif %}
         </div>
         <div class="table-container">
-            <table class="data-table">
+            <table class="data-table trimestres-table">
                 <thead>
                     <tr>
                         <th>Numero</th>
@@ -26,7 +26,7 @@
                 </thead>
                 <tbody>
                     {% for item in trimestres %}
-                        <tr>
+                        <tr{% if forloop.counter > 4 %} class="trimestre-extra-row is-hidden"{% endif %}>
                             <td class="mono-text">T{{ item.numero }}</td>
                             <td>{{ item.ficha.codigo_ficha }}</td>
                             <td>{{ item.fecha_inicio }}</td>
@@ -51,7 +51,36 @@
                     {% endfor %}
                 </tbody>
             </table>
+            {% if trimestres|length > 4 %}
+                <div class="table-more-actions">
+                    <button class="btn-secondary" type="button" data-toggle-trimestres>Ver mas trimestres</button>
+                </div>
+            {% endif %}
         </div>
     </div>
 </section>
+{% endblock %}
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggle = document.querySelector('[data-toggle-trimestres]');
+        const rows = Array.from(document.querySelectorAll('.trimestre-extra-row'));
+
+        if (!toggle || !rows.length) {
+            return;
+        }
+
+        toggle.addEventListener('click', function () {
+            const isOpening = rows.some(function (row) {
+                return row.classList.contains('is-hidden');
+            });
+
+            rows.forEach(function (row) {
+                row.classList.toggle('is-hidden', !isOpening);
+            });
+
+            toggle.textContent = isOpening ? 'Ver menos trimestres' : 'Ver mas trimestres';
+        });
+    });
+</script>
 {% endblock %}
