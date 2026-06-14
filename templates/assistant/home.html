@@ -23,19 +23,19 @@
             </div>
         {% endif %}
         {% if historial %}
-            <div class="chart-panel assistant-history-panel">
-                <h2 class="chart-title">Conversacion reciente</h2>
+            <details class="assistant-history-panel">
+                <summary>Ver conversacion reciente</summary>
                 <div class="assistant-history-list">
                     {% for item in historial %}
                         <article class="assistant-history-item">
-                            <strong>Pregunta</strong>
-                            <p>{{ item.pregunta }}</p>
-                            <strong>Respuesta</strong>
-                            <p>{{ item.respuesta|truncatechars:260 }}</p>
+                            <span>Pregunta</span>
+                            <p>{{ item.pregunta|truncatechars:120 }}</p>
+                            <span>Respuesta</span>
+                            <p>{{ item.respuesta|truncatechars:160 }}</p>
                         </article>
                     {% endfor %}
                 </div>
-            </div>
+            </details>
         {% endif %}
     </div>
 </section>
