@@ -29,10 +29,7 @@
                         <tr>
                             <td class="mono-text">#{{ usuario.id }}</td>
                             <td class="usuario-name-cell">
-                                <div class="cell-stack usuario-name-stack">
-                                    <span class="cell-main">{{ usuario.nombre }}</span>
-                                    <span class="cell-sub">{{ usuario.apellido }}</span>
-                                </div>
+                                <span class="usuario-full-name">{{ usuario.nombre }} {{ usuario.apellido }}</span>
                             </td>
                             <td>{{ usuario.tipo_documento }}</td>
                             <td class="mono-text">{{ usuario.numero_documento }}</td>

@@ -1909,7 +1909,7 @@ a {
 
 .usuarios-table th:nth-child(2),
 .usuarios-table td:nth-child(2) {
-    width: 170px;
+    width: 210px;
 }
 
 .usuarios-table th:nth-child(3),
@@ -1937,20 +1937,60 @@ a {
     width: 230px;
 }
 
-.usuario-name-stack {
-    gap: 2px;
-    line-height: 1.25;
-}
-
-.usuario-name-stack .cell-main,
-.usuario-name-stack .cell-sub {
+.usuario-full-name {
+    display: inline-block;
     color: var(--text);
     font-weight: 800;
-    overflow-wrap: anywhere;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: break-word;
 }
 
 .usuario-email-cell {
     overflow-wrap: anywhere;
+}
+
+.instructores-table {
+    table-layout: fixed;
+    min-width: 1180px;
+}
+
+.instructores-table th:nth-child(1),
+.instructores-table td:nth-child(1) {
+    width: 190px;
+}
+
+.instructores-table th:nth-child(4),
+.instructores-table td:nth-child(4) {
+    width: 260px;
+}
+
+.aprendices-table {
+    table-layout: fixed;
+    min-width: 1080px;
+}
+
+.aprendices-table th:nth-child(1),
+.aprendices-table td:nth-child(1) {
+    width: 210px;
+}
+
+.aprendices-table th:nth-child(4),
+.aprendices-table td:nth-child(4) {
+    width: 280px;
+}
+
+.aprendices-table th:nth-child(6),
+.aprendices-table td:nth-child(6) {
+    width: 210px;
+}
+
+.person-full-name {
+    display: inline-block;
+    color: var(--text);
+    font-weight: 800;
+    line-height: 1.25;
+    white-space: nowrap;
 }
 
 .role-badge {

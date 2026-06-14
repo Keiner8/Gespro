@@ -16,7 +16,7 @@
             {% endif %}
         </div>
         <div class="table-container">
-            <table class="data-table">
+            <table class="data-table aprendices-table">
                 <thead>
                     <tr>
                         <th>Aprendiz</th>
@@ -30,10 +30,8 @@
                 <tbody>
                     {% for item in aprendices %}
                         <tr>
-                            <td>
-                                <div class="cell-stack">
-                                    <span class="cell-main">{{ item.usuario.nombre }} {{ item.usuario.apellido }}</span>
-                                </div>
+                            <td class="person-name-cell">
+                                <span class="person-full-name">{{ item.usuario.nombre }} {{ item.usuario.apellido }}</span>
                             </td>
                             <td>{{ item.usuario.tipo_documento }}</td>
                             <td class="mono-text">{{ item.usuario.numero_documento }}</td>

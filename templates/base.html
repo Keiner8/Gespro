@@ -280,6 +280,71 @@
             document.addEventListener('DOMContentLoaded', function () {
                 const messageItems = Array.from(document.querySelectorAll('.messages-swal-source li'));
                 const logoutLinks = Array.from(document.querySelectorAll('[data-logout-confirm="true"]'));
+                const actionLinks = Array.from(document.querySelectorAll('.btn-state-danger, .btn-state-success'));
+                const dangerForms = Array.from(document.querySelectorAll('form')).filter(function (form) {
+                    const submitButton = form.querySelector('button[type="submit"], input[type="submit"]');
+                    const actionText = submitButton ? (submitButton.textContent || submitButton.value || '').trim().toLowerCase() : '';
+                    return ['eliminar', 'desactivar', 'activar'].includes(actionText);
+                });
+
+                function confirmationCopy(actionText) {
+                    const action = (actionText || 'continuar').trim();
+                    const normalized = action.toLowerCase();
+
+                    if (normalized.includes('eliminar')) {
+                        return {
+                            icon: 'warning',
+                            title: 'Eliminar registro',
+                            text: 'Esta accion no se puede deshacer. ¿Estas seguro de que quieres eliminarlo?',
+                            confirmButtonText: 'Si, eliminar',
+                            confirmButtonColor: '#dc2626'
+                        };
+                    }
+
+                    if (normalized.includes('desactivar')) {
+                        return {
+                            icon: 'warning',
+                            title: 'Desactivar registro',
+                            text: 'El registro quedara inactivo. ¿Estas seguro de que quieres desactivarlo?',
+                            confirmButtonText: 'Si, desactivar',
+                            confirmButtonColor: '#dc2626'
+                        };
+                    }
+
+                    if (normalized.includes('activar')) {
+                        return {
+                            icon: 'question',
+                            title: 'Activar registro',
+                            text: 'El registro quedara activo nuevamente. ¿Quieres continuar?',
+                            confirmButtonText: 'Si, activar',
+                            confirmButtonColor: '#16a34a'
+                        };
+                    }
+
+                    return {
+                        icon: 'question',
+                        title: 'Confirmar accion',
+                        text: '¿Estas seguro de que quieres continuar?',
+                        confirmButtonText: 'Si, continuar',
+                        confirmButtonColor: '#2563eb'
+                    };
+                }
+
+                async function confirmAction(actionText) {
+                    const copy = confirmationCopy(actionText);
+                    return Swal.fire({
+                        icon: copy.icon,
+                        title: copy.title,
+                        text: copy.text,
+                        showCancelButton: true,
+                        confirmButtonText: copy.confirmButtonText,
+                        cancelButtonText: 'No, cancelar',
+                        confirmButtonColor: copy.confirmButtonColor,
+                        cancelButtonColor: '#64748b',
+                        reverseButtons: true,
+                        focusCancel: true
+                    });
+                }
 
                 async function showMessages() {
                     for (const item of messageItems) {
@@ -332,6 +397,32 @@
                             csrfInput.value = '{{ csrf_token }}';
                             form.appendChild(csrfInput);
                             document.body.appendChild(form);
+                            form.submit();
+                        }
+                    });
+                });
+
+                actionLinks.forEach(function (link) {
+                    link.addEventListener('click', async function (event) {
+                        event.preventDefault();
+                        const result = await confirmAction(link.textContent.trim());
+                        if (result.isConfirmed) {
+                            window.location.href = link.href;
+                        }
+                    });
+                });
+
+                dangerForms.forEach(function (form) {
+                    form.addEventListener('submit', async function (event) {
+                        if (form.dataset.confirmed === 'true') {
+                            return;
+                        }
+                        event.preventDefault();
+                        const submitButton = form.querySelector('button[type="submit"], input[type="submit"]');
+                        const actionText = submitButton ? (submitButton.textContent || submitButton.value || '').trim() : 'continuar';
+                        const result = await confirmAction(actionText);
+                        if (result.isConfirmed) {
+                            form.dataset.confirmed = 'true';
                             form.submit();
                         }
                     });
