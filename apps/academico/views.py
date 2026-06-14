@@ -1,6 +1,7 @@
 """Vistas del modulo academico renderizadas por servidor."""
 
 import csv
+import unicodedata
 from io import StringIO, TextIOWrapper
 
 from django.contrib import messages
@@ -601,10 +602,27 @@ def instructor_delete(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 CSV_REQUIRED_USER_COLUMNS = {'nombre', 'apellido', 'correo', 'tipo_documento', 'numero_documento'}
+CSV_HEADER_ALIASES = {
+    'email': 'correo',
+    'e_mail': 'correo',
+    'tipo_de_documento': 'tipo_documento',
+    'documento_tipo': 'tipo_documento',
+    'numero_de_documento': 'numero_documento',
+    'numero_documento_': 'numero_documento',
+    'documento': 'numero_documento',
+    'num_documento': 'numero_documento',
+}
 
 
 def _normalize_csv_header(field: str | None) -> str:
-    return (field or '').replace('\ufeff', '').strip().lower().replace(' ', '_').replace('-', '_')
+    value = (field or '').replace('\ufeff', '').strip().lower()
+    value = ''.join(
+        char
+        for char in unicodedata.normalize('NFKD', value)
+        if not unicodedata.combining(char)
+    )
+    value = value.replace('-', '_').replace(' ', '_').replace('__', '_').strip('_')
+    return CSV_HEADER_ALIASES.get(value, value)
 
 
 def _normalize_reader_fieldnames(reader) -> None:
@@ -644,6 +662,18 @@ def _normalize_csv_value(row, key: str) -> str:
     return str(row.get(key) or '').strip()
 
 
+def _csv_row_debug(row: dict) -> str:
+    columnas = ', '.join(str(key) for key in row.keys()) or 'sin columnas'
+    muestra = []
+    for key, value in list(row.items())[:5]:
+        clean_value = str(value or '').replace('\n', ' ').replace('\r', ' ').strip()
+        if len(clean_value) > 45:
+            clean_value = clean_value[:45] + '...'
+        muestra.append(f'{key}={clean_value}')
+    datos = ' | '.join(muestra) or 'sin datos'
+    return f'Columnas detectadas: {columnas}. Datos recibidos: {datos}.'
+
+
 def _coerce_user_csv_row(row: dict) -> dict:
     normalized = {
         _normalize_csv_header(key): value
@@ -676,6 +706,7 @@ def _get_role(nombre_rol: str) -> Rol:
 
 
 def _create_or_get_usuario_from_row(row, role_name: str):
+    raw_row = row
     row = _coerce_user_csv_row(row)
     correo = _normalize_csv_value(row, 'correo').lower()
     numero_documento = _normalize_csv_value(row, 'numero_documento')
@@ -685,7 +716,22 @@ def _create_or_get_usuario_from_row(row, role_name: str):
     role = _get_role(role_name)
 
     if not all([correo, numero_documento, nombre, apellido, tipo_documento]):
-        return None, 'Faltan columnas obligatorias. Usa: nombre, apellido, correo, tipo_documento, numero_documento.'
+        faltantes = [
+            label
+            for label, value in [
+                ('nombre', nombre),
+                ('apellido', apellido),
+                ('correo', correo),
+                ('tipo_documento', tipo_documento),
+                ('numero_documento', numero_documento),
+            ]
+            if not value
+        ]
+        return None, (
+            'Faltan columnas o datos obligatorios: '
+            f'{", ".join(faltantes)}. Usa: nombre, apellido, correo, tipo_documento, numero_documento. '
+            f'{_csv_row_debug(row)} Original: {_csv_row_debug(raw_row)}'
+        )
 
     usuario = Usuario.objects.filter(correo=correo).first()
     if usuario:
