@@ -601,7 +601,21 @@ def instructor_delete(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 def _open_csv_file(uploaded_file):
-    return csv.DictReader(TextIOWrapper(uploaded_file.file, encoding='utf-8-sig'))
+    text_file = TextIOWrapper(uploaded_file.file, encoding='utf-8-sig', newline='')
+    sample = text_file.read(4096)
+    text_file.seek(0)
+    try:
+        dialect = csv.Sniffer().sniff(sample, delimiters=',;')
+    except csv.Error:
+        dialect = csv.excel
+
+    reader = csv.DictReader(text_file, dialect=dialect)
+    if reader.fieldnames:
+        reader.fieldnames = [
+            (field or '').strip().lower().replace(' ', '_')
+            for field in reader.fieldnames
+        ]
+    return reader
 
 
 def _normalize_csv_value(row, key: str) -> str:
@@ -622,7 +636,7 @@ def _create_or_get_usuario_from_row(row, role_name: str):
     role = _get_role(role_name)
 
     if not all([correo, numero_documento, nombre, apellido, tipo_documento]):
-        return None, 'Faltan columnas obligatorias del usuario.'
+        return None, 'Faltan columnas obligatorias. Usa: nombre, apellido, correo, tipo_documento, numero_documento.'
 
     usuario = Usuario.objects.filter(correo=correo).first()
     if usuario:

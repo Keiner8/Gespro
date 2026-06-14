@@ -2,7 +2,7 @@
 
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 from apps.cuentas.views import login_required, role_required
 
@@ -19,6 +19,11 @@ def assistant_home(request: HttpRequest) -> HttpResponse:
     respuesta = ''
     historial = request.session.get(ASSISTANT_HISTORY_SESSION_KEY, [])
     form = AssistantPromptForm(request.POST or None)
+    if request.method == 'POST' and request.POST.get('action') == 'clear_history':
+        request.session.pop(ASSISTANT_HISTORY_SESSION_KEY, None)
+        request.session.modified = True
+        messages.success(request, 'Conversacion eliminada correctamente.')
+        return redirect('assistant:home')
     if request.method == 'POST' and form.is_valid():
         pregunta = form.cleaned_data['texto']
         try:

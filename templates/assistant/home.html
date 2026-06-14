@@ -25,6 +25,11 @@
         {% if historial %}
             <details class="assistant-history-panel">
                 <summary>Ver conversacion reciente</summary>
+                <form method="post" class="assistant-history-actions">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="clear_history">
+                    <button class="btn-link" type="submit">Eliminar conversacion</button>
+                </form>
                 <div class="assistant-history-list">
                     {% for item in historial %}
                         <article class="assistant-history-item">

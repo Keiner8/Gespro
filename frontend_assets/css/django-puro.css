@@ -2793,6 +2793,16 @@ a {
     padding: 0 18px 18px;
 }
 
+.assistant-history-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 18px 12px;
+}
+
+.assistant-history-actions .btn-link {
+    color: #dc2626;
+}
+
 .assistant-history-item {
     padding: 12px 14px;
     border: 1px solid rgba(148, 163, 184, 0.2);
