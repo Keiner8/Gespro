@@ -256,11 +256,17 @@ def create_profile_for_role(usuario: Usuario) -> None:
 
     rol_nombre = usuario.rol.nombre_rol.lower() if usuario.rol else ''
     if rol_nombre == 'administrador':
+        Aprendiz.objects.filter(usuario=usuario).delete()
+        Instructor.objects.filter(usuario=usuario).delete()
         Administrador.objects.get_or_create(usuario=usuario)
     elif rol_nombre == 'instructor':
+        Aprendiz.objects.filter(usuario=usuario).delete()
+        Administrador.objects.filter(usuario=usuario).delete()
         if not Instructor.objects.filter(usuario=usuario).exists():
             Instructor.objects.create(usuario=usuario)
     elif rol_nombre == 'aprendiz':
+        Instructor.objects.filter(usuario=usuario).delete()
+        Administrador.objects.filter(usuario=usuario).delete()
         ficha = Ficha.objects.order_by('id').first() or ensure_default_ficha()
         if ficha and not Aprendiz.objects.filter(usuario=usuario).exists():
             Aprendiz.objects.create(usuario=usuario, ficha=ficha)

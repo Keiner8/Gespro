@@ -284,7 +284,9 @@ def build_rows(report_name: str, filters: dict | None = None):
         return headers, rows
 
     if report_name == 'aprendices':
-        queryset = Aprendiz.objects.select_related('usuario', 'usuario__rol', 'ficha').all()
+        queryset = Aprendiz.objects.select_related('usuario', 'usuario__rol', 'ficha').filter(
+            usuario__rol__nombre_rol__iexact='aprendiz',
+        )
         queryset = _matches_search(queryset, report_name, search)
         if filters.get('ficha'):
             queryset = queryset.filter(ficha_id=filters['ficha'])
@@ -304,7 +306,9 @@ def build_rows(report_name: str, filters: dict | None = None):
         return headers, rows
 
     if report_name == 'instructores':
-        queryset = Instructor.objects.select_related('usuario', 'usuario__rol', 'ficha').all()
+        queryset = Instructor.objects.select_related('usuario', 'usuario__rol', 'ficha').filter(
+            usuario__rol__nombre_rol__iexact='instructor',
+        )
         queryset = _matches_search(queryset, report_name, search)
         if filters.get('ficha'):
             queryset = queryset.filter(ficha_id=filters['ficha'])

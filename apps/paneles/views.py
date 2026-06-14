@@ -40,6 +40,8 @@ def _instructor_ficha_ids(usuario) -> list[int]:
 
 
 def _aprendiz_profile(usuario):
+    if _role_name(usuario) != 'aprendiz':
+        return None
     return Aprendiz.objects.filter(usuario=usuario).first()
 
 
@@ -54,7 +56,7 @@ def _instructores_count_by_ficha(ficha_id: int | None) -> int:
     if not ficha_id:
         return 0
     try:
-        return Instructor.objects.filter(ficha_id=ficha_id).count()
+        return Instructor.objects.filter(ficha_id=ficha_id, usuario__rol__nombre_rol__iexact='instructor').count()
     except DatabaseError:
         return 0
 
@@ -118,8 +120,8 @@ def panel(request: HttpRequest, role: str) -> HttpResponse:
             'total_proyectos': proyectos_qs.count(),
             'total_entregables': Entregable.objects.count(),
             'total_evaluaciones': evaluaciones_qs.count(),
-            'total_aprendices': Aprendiz.objects.count(),
-            'total_instructores': Instructor.objects.count(),
+            'total_aprendices': Aprendiz.objects.filter(usuario__rol__nombre_rol__iexact='aprendiz').count(),
+            'total_instructores': Instructor.objects.filter(usuario__rol__nombre_rol__iexact='instructor').count(),
             'total_gaes': Gaes.objects.count(),
             'usuarios_activos': usuarios_qs.filter(estado=Usuario.Estado.ACTIVO).count(),
             'usuarios_inactivos': usuarios_qs.filter(estado=Usuario.Estado.INACTIVO).count(),
@@ -145,8 +147,14 @@ def panel(request: HttpRequest, role: str) -> HttpResponse:
             'total_proyectos': proyectos_qs.count(),
             'total_entregables': entregables_qs.count(),
             'total_evaluaciones': evaluaciones_qs.count(),
-            'total_aprendices': Aprendiz.objects.filter(ficha_id__in=ficha_ids).distinct().count(),
-            'total_instructores': Instructor.objects.filter(ficha_id__in=ficha_ids).distinct().count(),
+            'total_aprendices': Aprendiz.objects.filter(
+                ficha_id__in=ficha_ids,
+                usuario__rol__nombre_rol__iexact='aprendiz',
+            ).distinct().count(),
+            'total_instructores': Instructor.objects.filter(
+                ficha_id__in=ficha_ids,
+                usuario__rol__nombre_rol__iexact='instructor',
+            ).distinct().count(),
             'total_gaes': Gaes.objects.filter(ficha_id__in=ficha_ids).distinct().count(),
             'project_counts': project_counts,
             'trimestre_counts': trimestre_counts,

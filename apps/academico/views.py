@@ -145,14 +145,18 @@ def _instructor_ficha_resumenes(usuario):
 
 
 def _aprendices_queryset(usuario):
-    queryset = Aprendiz.objects.select_related('usuario', 'ficha').all()
+    queryset = Aprendiz.objects.select_related('usuario', 'usuario__rol', 'ficha').filter(
+        usuario__rol__nombre_rol__iexact='aprendiz',
+    )
     if _role_name(usuario) == 'instructor':
         queryset = queryset.filter(ficha_id__in=_instructor_ficha_ids(usuario))
     return queryset
 
 
 def _instructores_queryset(usuario):
-    queryset = Instructor.objects.select_related('usuario', 'ficha', 'trimestre').all()
+    queryset = Instructor.objects.select_related('usuario', 'usuario__rol', 'ficha', 'trimestre').filter(
+        usuario__rol__nombre_rol__iexact='instructor',
+    )
     if _role_name(usuario) == 'instructor':
         ficha_ids = _instructor_ficha_ids(usuario)
         queryset = queryset.filter(ficha_id__in=ficha_ids)
@@ -605,8 +609,8 @@ def _create_or_get_usuario_from_row(row, role_name: str):
         numero_documento=numero_documento,
         rol=role,
         estado=Usuario.Estado.ACTIVO,
-        debe_cambiar_password=(role_name == 'instructor'),
-        password_temporal=(role_name == 'instructor'),
+        debe_cambiar_password=(role_name in {'instructor', 'aprendiz'}),
+        password_temporal=(role_name in {'instructor', 'aprendiz'}),
     )
     return usuario, None
 

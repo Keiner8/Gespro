@@ -92,6 +92,10 @@ def _clear_rate_limit(key: str) -> None:
     cache.delete(key)
 
 
+def _requires_password_change(usuario: Usuario) -> bool:
+    return bool(usuario and (usuario.debe_cambiar_password or usuario.password_temporal))
+
+
 def get_current_user(request: HttpRequest) -> Usuario | None:
     user_id = request.session.get('gespro_user_id')
     if not user_id:
@@ -259,6 +263,10 @@ def login_view(request: HttpRequest) -> HttpResponse:
             )
 
         usuario = Usuario.objects.select_related('rol').filter(correo=correo).first()
+        if usuario is not None and usuario.estado == Usuario.Estado.ACTIVO and _requires_password_change(usuario):
+            request.session['password_reset_prefill_correo'] = usuario.correo
+            messages.warning(request, 'Antes de ingresar debes cambiar la contrasena temporal asignada.')
+            return redirect(f"{reverse('accounts:password_recovery')}?correo={usuario.correo}")
         if usuario is None:
             _record_rate_limit_attempt(rate_key, LOGIN_RATE_LIMIT_SECONDS)
             messages.error(request, 'No encontramos una cuenta registrada con ese correo.')
@@ -494,11 +502,13 @@ def usuarios_create(request: HttpRequest) -> HttpResponse:
             form.add_error('correo', validation_error)
         else:
             usuario = form.save(commit=False)
+            password_was_generated = not form.cleaned_data['password']
             raw_password = form.cleaned_data['password'] or 'Temporal123*'
             usuario.password = make_password(raw_password)
             rol_nombre = usuario.rol.nombre_rol.lower() if usuario.rol else ''
-            usuario.debe_cambiar_password = rol_nombre == 'instructor'
-            usuario.password_temporal = rol_nombre == 'instructor'
+            must_change_password = password_was_generated or rol_nombre == 'instructor'
+            usuario.debe_cambiar_password = must_change_password
+            usuario.password_temporal = must_change_password
             usuario.save()
             create_profile_for_role(usuario)
             messages.success(request, 'Usuario creado correctamente.')
@@ -528,8 +538,10 @@ def usuarios_update(request: HttpRequest, pk: int) -> HttpResponse:
                     form.add_error('password', 'La contraseña debe tener al menos 8 caracteres, mayúscula, minúscula, número y especial.')
                     return render(request, 'accounts/usuarios_form.html', {'form': form, 'title': 'Editar usuario'})
                 updated.password = make_password(raw_password)
-                updated.debe_cambiar_password = False
-                updated.password_temporal = False
+                rol_nombre = updated.rol.nombre_rol.lower() if updated.rol else ''
+                must_change_password = rol_nombre == 'instructor'
+                updated.debe_cambiar_password = must_change_password
+                updated.password_temporal = must_change_password
             else:
                 rol_nombre = updated.rol.nombre_rol.lower() if updated.rol else ''
                 if rol_nombre == 'instructor':

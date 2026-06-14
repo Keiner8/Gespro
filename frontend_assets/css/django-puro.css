@@ -1897,6 +1897,76 @@ a {
     border-bottom: 0;
 }
 
+.usuarios-table {
+    table-layout: fixed;
+    min-width: 980px;
+}
+
+.usuarios-table th:nth-child(1),
+.usuarios-table td:nth-child(1) {
+    width: 54px;
+}
+
+.usuarios-table th:nth-child(2),
+.usuarios-table td:nth-child(2) {
+    width: 170px;
+}
+
+.usuarios-table th:nth-child(3),
+.usuarios-table td:nth-child(3) {
+    width: 145px;
+}
+
+.usuarios-table th:nth-child(4),
+.usuarios-table td:nth-child(4) {
+    width: 170px;
+}
+
+.usuarios-table th:nth-child(6),
+.usuarios-table td:nth-child(6) {
+    width: 130px;
+}
+
+.usuarios-table th:nth-child(7),
+.usuarios-table td:nth-child(7) {
+    width: 110px;
+}
+
+.usuarios-table th:nth-child(8),
+.usuarios-table td:nth-child(8) {
+    width: 230px;
+}
+
+.usuario-name-stack {
+    gap: 2px;
+    line-height: 1.25;
+}
+
+.usuario-name-stack .cell-main,
+.usuario-name-stack .cell-sub {
+    color: var(--text);
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.usuario-email-cell {
+    overflow-wrap: anywhere;
+}
+
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #1e3a8a;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+
 .status-badge {
     display: inline-flex;
     align-items: center;

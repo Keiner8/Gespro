@@ -52,7 +52,10 @@ def validate_aprendiz_en_ficha(usuario, ficha, exclude_aprendiz_id=None):
     if not usuario or not ficha:
         return None
 
-    queryset = Aprendiz.objects.select_related('usuario', 'ficha').filter(ficha=ficha)
+    queryset = Aprendiz.objects.select_related('usuario', 'usuario__rol', 'ficha').filter(
+        ficha=ficha,
+        usuario__rol__nombre_rol__iexact='aprendiz',
+    )
     if exclude_aprendiz_id is not None:
         queryset = queryset.exclude(id=exclude_aprendiz_id)
 
@@ -73,5 +76,5 @@ def sync_aprendiz_gaes(aprendiz, gaes):
 
 
 def ficha_cupos_disponibles(ficha: Ficha) -> int:
-    total = Aprendiz.objects.filter(ficha=ficha).count()
+    total = Aprendiz.objects.filter(ficha=ficha, usuario__rol__nombre_rol__iexact='aprendiz').count()
     return max(30 - total, 0)

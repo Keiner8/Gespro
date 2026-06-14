@@ -76,10 +76,14 @@ def _evaluacion_destino_label(evaluacion) -> str:
 
 
 def _get_aprendiz_profile(usuario):
+    if _role_name(usuario) != 'aprendiz':
+        return None
     return Aprendiz.objects.filter(usuario=usuario).first()
 
 
 def _get_instructor_profiles(usuario):
+    if _role_name(usuario) != 'instructor':
+        return Instructor.objects.none()
     return Instructor.objects.filter(usuario=usuario).select_related('ficha', 'trimestre', 'usuario')
 
 
@@ -247,7 +251,9 @@ def _trimestres_queryset_for_user(usuario):
 
 def _aprendices_queryset_for_user(usuario):
     rol = _role_name(usuario)
-    queryset = Aprendiz.objects.select_related('usuario', 'ficha').all()
+    queryset = Aprendiz.objects.select_related('usuario', 'usuario__rol', 'ficha').filter(
+        usuario__rol__nombre_rol__iexact='aprendiz',
+    )
     if rol == 'instructor':
         queryset = queryset.filter(ficha_id__in=_get_instructor_ficha_ids(usuario))
     elif rol == 'aprendiz':
@@ -296,7 +302,10 @@ def _entregable_filter_context(usuario, ficha_id=None, gaes_id=None, destino='sc
     if ficha_id and destino == 'aprendiz':
         aprendices_disponibles = _aprendices_queryset_for_user(usuario).filter(ficha_id=ficha_id)
     if gaes_id:
-        aprendices_scrum = Aprendiz.objects.select_related('usuario', 'ficha').filter(gaes_links__gaes_id=gaes_id).order_by(
+        aprendices_scrum = Aprendiz.objects.select_related('usuario', 'usuario__rol', 'ficha').filter(
+            gaes_links__gaes_id=gaes_id,
+            usuario__rol__nombre_rol__iexact='aprendiz',
+        ).order_by(
             'usuario__nombre',
             'usuario__apellido',
         )

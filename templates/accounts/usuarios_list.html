@@ -11,7 +11,7 @@
             <a class="btn" href="{% url 'accounts:usuarios_create' %}">Nuevo usuario</a>
         </div>
         <div class="table-container">
-            <table class="data-table">
+            <table class="data-table usuarios-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -28,15 +28,16 @@
                     {% for usuario in usuarios %}
                         <tr>
                             <td class="mono-text">#{{ usuario.id }}</td>
-                            <td>
-                                <div class="cell-stack">
-                                    <span class="cell-main">{{ usuario.nombre }} {{ usuario.apellido }}</span>
+                            <td class="usuario-name-cell">
+                                <div class="cell-stack usuario-name-stack">
+                                    <span class="cell-main">{{ usuario.nombre }}</span>
+                                    <span class="cell-sub">{{ usuario.apellido }}</span>
                                 </div>
                             </td>
                             <td>{{ usuario.tipo_documento }}</td>
                             <td class="mono-text">{{ usuario.numero_documento }}</td>
-                            <td>{{ usuario.correo }}</td>
-                            <td>{{ usuario.rol.nombre_rol }}</td>
+                            <td class="usuario-email-cell">{{ usuario.correo }}</td>
+                            <td><span class="role-badge">{{ usuario.rol.nombre_rol }}</span></td>
                             <td><span class="status-badge {{ usuario.estado|lower }}">{{ usuario.estado }}</span></td>
                             <td>
                                 <div class="actions-group">

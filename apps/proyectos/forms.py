@@ -73,7 +73,9 @@ class EntregableForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['aprendiz'].queryset = Aprendiz.objects.select_related('usuario').order_by('usuario__nombre')
+        self.fields['aprendiz'].queryset = Aprendiz.objects.select_related('usuario', 'usuario__rol').filter(
+            usuario__rol__nombre_rol__iexact='aprendiz',
+        ).order_by('usuario__nombre')
         self.fields['proyecto'].label_from_instance = self._proyecto_label
         self.fields['trimestre'].label_from_instance = self._trimestre_label
         self.fields['aprendiz'].label_from_instance = self._aprendiz_label
@@ -155,7 +157,9 @@ class EvaluacionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['evaluador'].queryset = Instructor.objects.select_related('usuario').order_by('usuario__nombre')
+        self.fields['evaluador'].queryset = Instructor.objects.select_related('usuario', 'usuario__rol').filter(
+            usuario__rol__nombre_rol__iexact='instructor',
+        ).order_by('usuario__nombre')
         self.fields['entregable'].label_from_instance = self._entregable_label
         self.fields['aprendiz'].label_from_instance = self._aprendiz_label
         self.fields['gaes'].label_from_instance = self._gaes_label
