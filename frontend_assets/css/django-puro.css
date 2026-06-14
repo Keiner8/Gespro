@@ -256,12 +256,13 @@ a {
 }
 
 .left-sidebar {
-    min-height: calc(100vh - 72px);
-    padding: 24px 20px 28px;
+    height: calc(100vh - 72px);
+    min-height: 0;
+    padding: 18px 20px 16px;
     display: grid;
-    grid-template-rows: auto 1fr auto;
-    gap: 18px;
-    overflow-y: auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 12px;
+    overflow: hidden;
 }
 
 .sidebar-checkbox:not(:checked) + .sidebar-shell .left-sidebar {
@@ -328,27 +329,26 @@ a {
 
 .sidebar-brand-panel {
     display: grid;
-    gap: 14px;
+    gap: 10px;
     justify-items: center;
-    padding: 8px 8px 18px;
+    padding: 4px 8px 12px;
     color: #fff;
     text-decoration: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .sidebar-brand-panel img {
-    width: 150px;
-    height: 70px;
+    width: 124px;
+    height: 58px;
     object-fit: contain;
-    transform: scale(1.2);
 }
 
 .sidebar-brand-panel strong {
     width: 100%;
-    padding-top: 10px;
+    padding-top: 8px;
     border-top: 1px solid rgba(255, 255, 255, 0.20);
     text-align: center;
-    font-size: 1.35rem;
+    font-size: 1.25rem;
     letter-spacing: 0.02em;
 }
 
@@ -375,8 +375,12 @@ a {
 
 .sidebar-nav {
     display: grid;
-    gap: 10px;
+    gap: 8px;
     align-content: start;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
 }
 
 .sidebar-submenu {
@@ -414,7 +418,8 @@ a {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: 13px 16px;
+    min-height: 46px;
+    padding: 11px 16px;
     border-radius: 16px;
 }
 
@@ -441,6 +446,7 @@ a {
 
 .sidebar-actions {
     display: grid;
+    padding-top: 8px;
 }
 
 .sidebar-logout {
@@ -3016,7 +3022,7 @@ body {
 }
 
 .sidebar-nav {
-    gap: 11px;
+    gap: 8px;
 }
 
 .sidebar-nav .nav-link,
