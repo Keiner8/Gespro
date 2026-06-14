@@ -1,7 +1,7 @@
 """Vistas del modulo academico renderizadas por servidor."""
 
 import csv
-from io import TextIOWrapper
+from io import StringIO, TextIOWrapper
 
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
@@ -600,21 +600,43 @@ def instructor_delete(request: HttpRequest, pk: int) -> HttpResponse:
     return redirect('academic:instructor_list')
 
 
+CSV_REQUIRED_USER_COLUMNS = {'nombre', 'apellido', 'correo', 'tipo_documento', 'numero_documento'}
+
+
+def _normalize_csv_header(field: str | None) -> str:
+    return (field or '').strip().lower().replace(' ', '_').replace('-', '_')
+
+
+def _normalize_reader_fieldnames(reader) -> None:
+    if reader.fieldnames:
+        reader.fieldnames = [_normalize_csv_header(field) for field in reader.fieldnames]
+
+
 def _open_csv_file(uploaded_file):
     text_file = TextIOWrapper(uploaded_file.file, encoding='utf-8-sig', newline='')
-    sample = text_file.read(4096)
-    text_file.seek(0)
-    try:
-        dialect = csv.Sniffer().sniff(sample, delimiters=',;')
-    except csv.Error:
-        dialect = csv.excel
+    content = text_file.read()
+    if not content.strip():
+        return csv.DictReader(StringIO(''))
 
-    reader = csv.DictReader(text_file, dialect=dialect)
-    if reader.fieldnames:
-        reader.fieldnames = [
-            (field or '').strip().lower().replace(' ', '_')
-            for field in reader.fieldnames
-        ]
+    candidates = []
+    try:
+        candidates.append(csv.Sniffer().sniff(content[:4096], delimiters=',;\t'))
+    except csv.Error:
+        pass
+
+    for delimiter in (',', ';', '\t'):
+        dialect = csv.excel()
+        dialect.delimiter = delimiter
+        candidates.append(dialect)
+
+    for dialect in candidates:
+        reader = csv.DictReader(StringIO(content), dialect=dialect)
+        _normalize_reader_fieldnames(reader)
+        if CSV_REQUIRED_USER_COLUMNS.issubset(set(reader.fieldnames or [])):
+            return reader
+
+    reader = csv.DictReader(StringIO(content))
+    _normalize_reader_fieldnames(reader)
     return reader
 
 
