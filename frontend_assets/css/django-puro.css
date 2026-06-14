@@ -2300,6 +2300,24 @@ a {
     width: min(100%, 760px);
 }
 
+.auth-card-recovery {
+    width: min(100%, 720px);
+}
+
+.auth-card-recovery .form-grid {
+    grid-template-columns: 1fr;
+}
+
+.auth-card-recovery .form-grid p,
+.auth-card-recovery .form-field {
+    width: 100%;
+}
+
+.auth-card-recovery input[type="email"] {
+    width: 100%;
+    max-width: 100%;
+}
+
 .auth-card-register {
     position: relative;
     padding-top: 54px;
@@ -2697,6 +2715,42 @@ a {
     white-space: pre-wrap;
     line-height: 1.7;
     color: #334155;
+}
+
+.assistant-history-panel {
+    margin-top: 18px;
+}
+
+.assistant-history-list {
+    display: grid;
+    gap: 14px;
+}
+
+.assistant-history-item {
+    padding: 16px 18px;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 14px;
+    background: rgba(248, 250, 252, 0.86);
+}
+
+.assistant-history-item strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #1e3a8a;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.assistant-history-item p {
+    margin: 0 0 12px;
+    color: #334155;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.assistant-history-item p:last-child {
+    margin-bottom: 0;
 }
 
 .landing-shell {

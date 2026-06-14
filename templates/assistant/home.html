@@ -22,6 +22,21 @@
                 <div class="assistant-answer">{{ respuesta }}</div>
             </div>
         {% endif %}
+        {% if historial %}
+            <div class="chart-panel assistant-history-panel">
+                <h2 class="chart-title">Conversacion reciente</h2>
+                <div class="assistant-history-list">
+                    {% for item in historial %}
+                        <article class="assistant-history-item">
+                            <strong>Pregunta</strong>
+                            <p>{{ item.pregunta }}</p>
+                            <strong>Respuesta</strong>
+                            <p>{{ item.respuesta|truncatechars:260 }}</p>
+                        </article>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
     </div>
 </section>
 {% endblock %}
