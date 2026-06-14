@@ -6,7 +6,7 @@
         <div class="page-header">
             <div>
                 <h1 class="page-title">Trimestres</h1>
-                <span class="page-meta">{{ trimestres|length }} registros visibles</span>
+                <span class="page-meta">{{ trimestres|length }} trimestres en {{ trimestre_grupos|length }} ficha(s)</span>
             </div>
             {% if current_usuario.rol.nombre_rol|lower == 'administrador' %}
                 <a class="btn" href="{% url 'academic:trimestre_create' %}">Nuevo trimestre</a>
@@ -16,46 +16,82 @@
             <table class="data-table trimestres-table">
                 <thead>
                     <tr>
-                        <th>Numero</th>
                         <th>Ficha</th>
-                        <th>Inicio</th>
-                        <th>Fin</th>
+                        <th>Programa</th>
+                        <th>Nivel</th>
+                        <th>Trimestres</th>
+                        <th>Periodo</th>
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in trimestres %}
-                        <tr{% if forloop.counter > 4 %} class="trimestre-extra-row is-hidden"{% endif %}>
-                            <td class="mono-text">T{{ item.numero }}</td>
-                            <td>{{ item.ficha.codigo_ficha }}</td>
-                            <td>{{ item.fecha_inicio }}</td>
-                            <td>{{ item.fecha_fin }}</td>
-                            <td><span class="status-badge {{ item.estado|lower }}">{{ item.estado }}</span></td>
+                    {% for grupo in trimestre_grupos %}
+                        <tr>
+                            <td class="mono-text">{{ grupo.ficha.codigo_ficha }}</td>
                             <td>
-                                {% if current_usuario.rol.nombre_rol|lower == 'administrador' %}
-                                    <div class="actions-group">
-                                        <a class="btn-outline" href="{% url 'academic:trimestre_update' item.id %}">Editar</a>
-                                        <form method="post" action="{% url 'academic:trimestre_delete' item.id %}" class="inline-form">
-                                            {% csrf_token %}
-                                            <button class="btn-link" type="submit">Eliminar</button>
-                                        </form>
+                                <div class="cell-stack">
+                                    <span class="cell-main">{{ grupo.ficha.programa_formacion }}</span>
+                                    <span class="cell-sub">{{ grupo.ficha.modalidad }} - {{ grupo.ficha.jornada }}</span>
+                                </div>
+                            </td>
+                            <td>{{ grupo.ficha.nivel }}</td>
+                            <td><span class="status-badge activo">{{ grupo.total }} trimestres</span></td>
+                            <td>{{ grupo.fecha_inicio }} - {{ grupo.fecha_fin }}</td>
+                            <td><span class="status-badge {{ grupo.estado_general|lower }}">{{ grupo.estado_general }}</span></td>
+                            <td>
+                                <button class="btn-outline" type="button" data-toggle-trimestre-group="{{ grupo.ficha.id }}">Ver trimestres</button>
+                            </td>
+                        </tr>
+                        <tr class="trimestre-detail-row is-hidden" data-trimestre-group="{{ grupo.ficha.id }}">
+                            <td colspan="7" class="trimestre-detail-cell">
+                                <div class="trimestre-detail-panel">
+                                    <div class="trimestre-detail-header">
+                                        <strong>Trimestres de la ficha {{ grupo.ficha.codigo_ficha }}</strong>
+                                        <span>{{ grupo.total }} registros</span>
                                     </div>
-                                {% else %}
-                                    <span class="status-badge activo">Consulta</span>
-                                {% endif %}
+                                    <table class="data-table trimestre-inner-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Numero</th>
+                                                <th>Inicio</th>
+                                                <th>Fin</th>
+                                                <th>Estado</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in grupo.trimestres %}
+                                                <tr>
+                                                    <td class="mono-text">T{{ item.numero }}</td>
+                                                    <td>{{ item.fecha_inicio }}</td>
+                                                    <td>{{ item.fecha_fin }}</td>
+                                                    <td><span class="status-badge {{ item.estado|lower }}">{{ item.estado }}</span></td>
+                                                    <td>
+                                                        {% if current_usuario.rol.nombre_rol|lower == 'administrador' %}
+                                                            <div class="actions-group">
+                                                                <a class="btn-outline" href="{% url 'academic:trimestre_update' item.id %}">Editar</a>
+                                                                <form method="post" action="{% url 'academic:trimestre_delete' item.id %}" class="inline-form">
+                                                                    {% csrf_token %}
+                                                                    <button class="btn-link" type="submit">Eliminar</button>
+                                                                </form>
+                                                            </div>
+                                                        {% else %}
+                                                            <span class="status-badge activo">Consulta</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </td>
                         </tr>
                     {% empty %}
-                        <tr><td colspan="6" class="empty-state">No hay trimestres registrados.</td></tr>
+                        <tr><td colspan="7" class="empty-state">No hay trimestres registrados.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
-            {% if trimestres|length > 4 %}
-                <div class="table-more-actions">
-                    <button class="btn-secondary" type="button" data-toggle-trimestres>Ver mas trimestres</button>
-                </div>
-            {% endif %}
         </div>
     </div>
 </section>
@@ -63,23 +99,16 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const toggle = document.querySelector('[data-toggle-trimestres]');
-        const rows = Array.from(document.querySelectorAll('.trimestre-extra-row'));
-
-        if (!toggle || !rows.length) {
-            return;
-        }
-
-        toggle.addEventListener('click', function () {
-            const isOpening = rows.some(function (row) {
-                return row.classList.contains('is-hidden');
+        document.querySelectorAll('[data-toggle-trimestre-group]').forEach(function (toggle) {
+            toggle.addEventListener('click', function () {
+                const groupId = toggle.dataset.toggleTrimestreGroup;
+                const row = document.querySelector('[data-trimestre-group="' + groupId + '"]');
+                if (!row) {
+                    return;
+                }
+                const isHidden = row.classList.toggle('is-hidden');
+                toggle.textContent = isHidden ? 'Ver trimestres' : 'Ocultar trimestres';
             });
-
-            rows.forEach(function (row) {
-                row.classList.toggle('is-hidden', !isOpening);
-            });
-
-            toggle.textContent = isOpening ? 'Ver menos trimestres' : 'Ver mas trimestres';
         });
     });
 </script>

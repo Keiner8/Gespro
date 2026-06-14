@@ -1897,18 +1897,44 @@ a {
     border-bottom: 0;
 }
 
-.trimestres-table .trimestre-extra-row.is-hidden {
+.trimestre-detail-row.is-hidden {
     display: none;
 }
 
-.table-more-actions {
-    display: flex;
-    justify-content: center;
-    padding: 18px 0 2px;
+.trimestre-detail-cell {
+    padding: 0 20px 24px !important;
+    background: #f8fbff;
 }
 
-.table-more-actions .btn-secondary {
-    min-width: 190px;
+.trimestre-detail-panel {
+    margin-top: 14px;
+    padding: 18px;
+    border: 1px solid rgba(191, 219, 254, 0.9);
+    border-radius: 18px;
+    background: #ffffff;
+}
+
+.trimestre-detail-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+    color: var(--text);
+}
+
+.trimestre-detail-header span {
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.trimestre-inner-table {
+    min-width: 720px;
+    box-shadow: none;
+}
+
+.trimestre-inner-table th,
+.trimestre-inner-table td {
+    padding: 14px 16px;
 }
 
 .usuarios-table {

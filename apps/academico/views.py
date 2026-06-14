@@ -358,7 +358,41 @@ def ficha_delete(request: HttpRequest, pk: int) -> HttpResponse:
 def trimestre_list(request: HttpRequest) -> HttpResponse:
     usuario = _current_usuario(request)
     trimestres = _filter_trimestres(_trimestres_queryset(usuario), _search_query(request))
-    return render(request, 'academic/trimestres_list.html', {'trimestres': trimestres})
+    grupos_map = {}
+    for trimestre in trimestres:
+        ficha = trimestre.ficha
+        if ficha.id not in grupos_map:
+            grupos_map[ficha.id] = {
+                'ficha': ficha,
+                'trimestres': [],
+            }
+        grupos_map[ficha.id]['trimestres'].append(trimestre)
+
+    grupos = []
+    for grupo in grupos_map.values():
+        trimestres_grupo = grupo['trimestres']
+        estados = {item.estado for item in trimestres_grupo}
+        if Trimestre.Estado.ACTIVO in estados:
+            estado_general = Trimestre.Estado.ACTIVO
+        elif Trimestre.Estado.PENDIENTE in estados:
+            estado_general = Trimestre.Estado.PENDIENTE
+        else:
+            estado_general = Trimestre.Estado.FINALIZADO
+
+        grupo['total'] = len(trimestres_grupo)
+        grupo['fecha_inicio'] = trimestres_grupo[0].fecha_inicio
+        grupo['fecha_fin'] = trimestres_grupo[-1].fecha_fin
+        grupo['estado_general'] = estado_general
+        grupos.append(grupo)
+
+    return render(
+        request,
+        'academic/trimestres_list.html',
+        {
+            'trimestres': trimestres,
+            'trimestre_grupos': grupos,
+        },
+    )
 
 
 @login_required
