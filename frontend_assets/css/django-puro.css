@@ -1992,17 +1992,44 @@ a {
 
 .instructores-table {
     table-layout: fixed;
-    min-width: 1180px;
+    min-width: 1260px;
 }
 
 .instructores-table th:nth-child(1),
 .instructores-table td:nth-child(1) {
-    width: 190px;
+    width: 180px;
+}
+
+.instructores-table th:nth-child(2),
+.instructores-table td:nth-child(2) {
+    width: 140px;
+}
+
+.instructores-table th:nth-child(3),
+.instructores-table td:nth-child(3) {
+    width: 160px;
 }
 
 .instructores-table th:nth-child(4),
 .instructores-table td:nth-child(4) {
-    width: 260px;
+    width: 250px;
+}
+
+.instructores-table th:nth-child(5),
+.instructores-table td:nth-child(5),
+.instructores-table th:nth-child(6),
+.instructores-table td:nth-child(6) {
+    width: 140px;
+}
+
+.instructores-table th:nth-child(7),
+.instructores-table td:nth-child(7) {
+    width: 170px;
+}
+
+.instructores-table th:nth-child(8),
+.instructores-table td:nth-child(8) {
+    width: 240px;
 }
 
 .aprendices-table {
