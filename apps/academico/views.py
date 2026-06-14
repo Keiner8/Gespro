@@ -604,7 +604,7 @@ CSV_REQUIRED_USER_COLUMNS = {'nombre', 'apellido', 'correo', 'tipo_documento', '
 
 
 def _normalize_csv_header(field: str | None) -> str:
-    return (field or '').strip().lower().replace(' ', '_').replace('-', '_')
+    return (field or '').replace('\ufeff', '').strip().lower().replace(' ', '_').replace('-', '_')
 
 
 def _normalize_reader_fieldnames(reader) -> None:
@@ -644,12 +644,39 @@ def _normalize_csv_value(row, key: str) -> str:
     return str(row.get(key) or '').strip()
 
 
+def _coerce_user_csv_row(row: dict) -> dict:
+    normalized = {
+        _normalize_csv_header(key): value
+        for key, value in row.items()
+        if key is not None
+    }
+    if CSV_REQUIRED_USER_COLUMNS.issubset(set(normalized)):
+        return normalized
+
+    for key, value in row.items():
+        header_text = str(key or '')
+        value_text = str(value or '')
+        for delimiter in (',', ';', '\t'):
+            if delimiter not in header_text:
+                continue
+            headers = [_normalize_csv_header(part) for part in header_text.split(delimiter)]
+            values = [part.strip() for part in value_text.split(delimiter)]
+            if len(values) < len(headers):
+                continue
+            rebuilt = dict(zip(headers, values))
+            if CSV_REQUIRED_USER_COLUMNS.issubset(set(rebuilt)):
+                return rebuilt
+
+    return normalized
+
+
 def _get_role(nombre_rol: str) -> Rol:
     ensure_default_roles()
     return Rol.objects.get(nombre_rol__iexact=nombre_rol)
 
 
 def _create_or_get_usuario_from_row(row, role_name: str):
+    row = _coerce_user_csv_row(row)
     correo = _normalize_csv_value(row, 'correo').lower()
     numero_documento = _normalize_csv_value(row, 'numero_documento')
     nombre = _normalize_csv_value(row, 'nombre')
