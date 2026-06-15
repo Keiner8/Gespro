@@ -10,6 +10,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import content_disposition_header
 from django.utils import timezone
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from openpyxl import Workbook
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
@@ -809,6 +810,7 @@ def entregable_open(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @login_required
+@xframe_options_sameorigin
 def entregable_inline(request: HttpRequest, pk: int) -> HttpResponse:
     usuario = get_current_user(request)
     item = get_object_or_404(_entregables_queryset(usuario), pk=pk)
