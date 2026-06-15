@@ -95,6 +95,8 @@
                                         <span class="status-badge {% if row.evaluacion_final.estado == 'aprobado' %}activo{% else %}inactivo{% endif %}">
                                             {{ row.evaluacion_final.get_estado_display }}
                                         </span>
+                                    {% elif not row.entrega_realizada %}
+                                        <span class="status-badge pendiente">En proceso</span>
                                     {% else %}
                                         <span class="status-badge pendiente">Pendiente</span>
                                     {% endif %}
@@ -108,6 +110,7 @@
                                 </td>
                                 <td>
                                     <div class="final-actions">
+                                        {% if row.entrega_realizada %}
                                         <form method="post" action="{% url 'projects:evaluacion_final_guardar' row.aprendiz.id row.trimestre.id 'aprobado' %}" class="final-evaluation-form">
                                             {% csrf_token %}
                                             <input class="inline-observation-input" type="text" name="observaciones" placeholder="Observación opcional">
@@ -117,6 +120,15 @@
                                             {% csrf_token %}
                                             <button class="btn-danger-solid" type="submit">No aprobar</button>
                                         </form>
+                                        {% else %}
+                                            <span class="cell-sub final-lock-note">Sin entrega registrada</span>
+                                        {% endif %}
+                                        {% if row.evaluacion_final %}
+                                            <form method="post" action="{% url 'projects:evaluacion_final_guardar' row.aprendiz.id row.trimestre.id 'pendiente' %}" class="inline-form">
+                                                {% csrf_token %}
+                                                <button class="btn-outline" type="submit">Volver a pendiente</button>
+                                            </form>
+                                        {% endif %}
                                     </div>
                                 </td>
                             </tr>

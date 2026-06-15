@@ -307,7 +307,16 @@ def logout_view(request: HttpRequest) -> HttpResponse:
 
 def password_recovery_request(request: HttpRequest) -> HttpResponse:
     ensure_default_roles()
-    initial = {'correo': request.GET.get('correo') or request.session.get('password_reset_prefill_correo', '')}
+    if request.method == 'GET' and request.session.get('password_reset_correo') and request.GET.get('reenviar') != '1':
+        return redirect('accounts:password_reset_confirm')
+
+    initial = {
+        'correo': (
+            request.GET.get('correo')
+            or request.session.get('password_reset_prefill_correo', '')
+            or request.session.get('password_reset_correo', '')
+        )
+    }
     form = PasswordRecoveryRequestForm(request.POST or None, initial=initial)
 
     if request.method == 'POST' and form.is_valid():

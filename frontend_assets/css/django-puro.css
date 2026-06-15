@@ -1110,6 +1110,11 @@ a {
     flex-wrap: wrap;
 }
 
+.final-lock-note {
+    min-width: 150px;
+    font-weight: 800;
+}
+
 .final-empty-state {
     padding: 34px !important;
     color: #5f718b;
@@ -2368,11 +2373,12 @@ a {
 }
 
 .auth-card-recovery {
-    width: min(100%, 560px);
+    width: min(100%, 520px);
 }
 
 .auth-card-recovery .form-grid {
     grid-template-columns: 1fr;
+    max-width: 420px;
 }
 
 .auth-card-recovery .form-grid p,
@@ -2382,7 +2388,7 @@ a {
 
 .auth-card-recovery input[type="email"] {
     width: 100%;
-    max-width: 100%;
+    max-width: 420px;
 }
 
 .auth-card-register {

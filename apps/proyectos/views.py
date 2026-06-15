@@ -455,6 +455,20 @@ def _instructor_assignments(usuario):
     )
 
 
+def _entrega_realizada(aprendiz: Aprendiz, trimestre: Trimestre) -> bool:
+    evidencias = Entregable.objects.filter(
+        trimestre=trimestre,
+    ).filter(
+        Q(aprendiz=aprendiz)
+        | Q(aprendiz__isnull=True, proyecto__gaes__aprendiz_links__aprendiz=aprendiz)
+    ).filter(
+        Q(archivo__isnull=False)
+        | (Q(nombre_archivo__isnull=False) & ~Q(nombre_archivo=''))
+        | (Q(url__isnull=False) & ~Q(url=''))
+    )
+    return evidencias.distinct().exists()
+
+
 def _evaluacion_final_rows(usuario):
     rows = []
     for instructor in _instructor_assignments(usuario):
@@ -476,6 +490,7 @@ def _evaluacion_final_rows(usuario):
                     'aprendiz': aprendiz,
                     'trimestre': instructor.trimestre,
                     'evaluacion_final': finales.get(aprendiz.id),
+                    'entrega_realizada': _entrega_realizada(aprendiz, instructor.trimestre),
                 }
             )
     return rows
@@ -960,12 +975,27 @@ def evaluacion_final_guardar(request: HttpRequest, aprendiz_id: int, trimestre_i
     usuario = get_current_user(request)
     if request.method != 'POST':
         return redirect('projects:evaluacion_final_list')
-    if estado not in {EvaluacionFinalTrimestre.Estado.APROBADO, EvaluacionFinalTrimestre.Estado.NO_APROBADO}:
+    estados_validos = {
+        EvaluacionFinalTrimestre.Estado.APROBADO,
+        EvaluacionFinalTrimestre.Estado.NO_APROBADO,
+        'pendiente',
+    }
+    if estado not in estados_validos:
         messages.error(request, 'No se pudo registrar el resultado. Intenta nuevamente.')
         return redirect('projects:evaluacion_final_list')
 
     instructor = get_object_or_404(_instructor_assignments(usuario), trimestre_id=trimestre_id)
     aprendiz = get_object_or_404(Aprendiz.objects.select_related('usuario', 'ficha'), pk=aprendiz_id, ficha=instructor.ficha)
+
+    if estado == 'pendiente':
+        EvaluacionFinalTrimestre.objects.filter(aprendiz=aprendiz, trimestre=instructor.trimestre).delete()
+        messages.success(request, 'Evaluacion final devuelta a pendiente correctamente.')
+        return redirect('projects:evaluacion_final_list')
+
+    if not _entrega_realizada(aprendiz, instructor.trimestre):
+        messages.error(request, 'No puedes cerrar la evaluacion final porque el aprendiz aun no ha entregado evidencia en este trimestre.')
+        return redirect('projects:evaluacion_final_list')
+
     evaluacion_final, _created = EvaluacionFinalTrimestre.objects.update_or_create(
         aprendiz=aprendiz,
         trimestre=instructor.trimestre,
