@@ -81,7 +81,11 @@
                             <tr>
                                 <td>
                                     <div class="final-user-cell">
-                                        <span class="final-avatar">{{ row.aprendiz.usuario.nombre|first|upper }}{{ row.aprendiz.usuario.apellido|first|upper }}</span>
+                                        {% if row.aprendiz.usuario.foto_perfil %}
+                                            <img class="final-avatar final-avatar-img" src="{{ row.aprendiz.usuario.foto_perfil.url }}" alt="Foto de {{ row.aprendiz.usuario.nombre }}">
+                                        {% else %}
+                                            <span class="final-avatar">{{ row.aprendiz.usuario.nombre|first|upper }}{{ row.aprendiz.usuario.apellido|first|upper }}</span>
+                                        {% endif %}
                                         <div class="cell-stack">
                                             <span class="cell-main">{{ row.aprendiz.usuario.nombre }} {{ row.aprendiz.usuario.apellido }}</span>
                                             <span class="cell-sub">{{ row.aprendiz.usuario.tipo_documento }} {{ row.aprendiz.usuario.numero_documento }}</span>
@@ -120,8 +124,6 @@
                                             {% csrf_token %}
                                             <button class="btn-danger-solid" type="submit">No aprobar</button>
                                         </form>
-                                        {% else %}
-                                            <span class="cell-sub final-lock-note">Sin entrega registrada</span>
                                         {% endif %}
                                         {% if row.evaluacion_final %}
                                             <form method="post" action="{% url 'projects:evaluacion_final_guardar' row.aprendiz.id row.trimestre.id 'pendiente' %}" class="inline-form">
