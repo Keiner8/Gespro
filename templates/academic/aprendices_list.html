@@ -36,7 +36,13 @@
                             <td>{{ item.usuario.tipo_documento }}</td>
                             <td class="mono-text">{{ item.usuario.numero_documento }}</td>
                             <td>{{ item.usuario.correo }}</td>
-                            <td>{{ item.ficha.codigo_ficha }}</td>
+                            <td>
+                                {% if item.ficha %}
+                                    {{ item.ficha.codigo_ficha }}
+                                {% else %}
+                                    <span class="cell-sub">Sin ficha asignada</span>
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if current_usuario.rol.nombre_rol|lower == 'administrador' %}
                                     <div class="actions-group">

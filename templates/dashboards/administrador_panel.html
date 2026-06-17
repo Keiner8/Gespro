@@ -5,7 +5,8 @@
     <div class="page-card role-admin">
         <div class="page-header">
             <div>
-                <h1 class="page-title">Panel del Administrador</h1>
+                <h1 class="page-title">Hola, {{ usuario.nombre }}</h1>
+                <p class="page-subtitle">Panel del Administrador</p>
             </div>
             <div class="btn-row">
                 <a class="btn" href="{% url 'dashboards:reportes_home' %}">Ver reportes</a>

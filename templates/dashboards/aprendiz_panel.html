@@ -5,7 +5,8 @@
     <div class="page-card role-aprendiz">
         <div class="page-header">
             <div>
-                <h1 class="page-title">Panel del Aprendiz</h1>
+                <h1 class="page-title">Hola, {{ usuario.nombre }}</h1>
+                <p class="page-subtitle">Panel del Aprendiz</p>
             </div>
             <div class="btn-row">
                 <a class="btn" href="{% url 'projects:entregable_list' %}">Mis entregables</a>

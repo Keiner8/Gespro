@@ -43,7 +43,7 @@ class Ficha(models.Model):
 
 class Aprendiz(models.Model):
     usuario = models.ForeignKey('accounts.Usuario', on_delete=models.CASCADE, db_column='usuario_id', related_name='aprendiz_perfiles')
-    ficha = models.ForeignKey(Ficha, on_delete=models.CASCADE, db_column='ficha_id', related_name='aprendices')
+    ficha = models.ForeignKey(Ficha, on_delete=models.SET_NULL, db_column='ficha_id', related_name='aprendices', null=True, blank=True)
 
     class Meta:
         db_table = 'aprendiz'

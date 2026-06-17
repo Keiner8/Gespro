@@ -65,7 +65,13 @@
                                 <tr>
                                     <td>{{ aprendiz.usuario.nombre }} {{ aprendiz.usuario.apellido }}</td>
                                     <td>{{ aprendiz.usuario.numero_documento }}</td>
-                                    <td>{{ aprendiz.ficha.codigo_ficha }}</td>
+                                    <td>
+                                        {% if aprendiz.ficha %}
+                                            {{ aprendiz.ficha.codigo_ficha }}
+                                        {% else %}
+                                            <span class="cell-sub">Sin ficha</span>
+                                        {% endif %}
+                                    </td>
                                 </tr>
                             {% empty %}
                                 <tr><td colspan="3" class="empty-state">Este equipo Scrum no tiene aprendices asociados.</td></tr>

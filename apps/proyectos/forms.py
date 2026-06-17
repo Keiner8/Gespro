@@ -97,7 +97,8 @@ class EntregableForm(forms.ModelForm):
     @staticmethod
     def _aprendiz_label(aprendiz):
         usuario = aprendiz.usuario
-        return f'{usuario.nombre} {usuario.apellido} - {aprendiz.ficha.codigo_ficha}'
+        ficha = aprendiz.ficha.codigo_ficha if aprendiz.ficha_id else 'Sin ficha'
+        return f'{usuario.nombre} {usuario.apellido} - {ficha}'
 
     def clean_archivo_upload(self):
         return validate_evidence_file(self.cleaned_data.get('archivo_upload'))
@@ -178,7 +179,8 @@ class EvaluacionForm(forms.ModelForm):
     @staticmethod
     def _aprendiz_label(aprendiz):
         usuario = aprendiz.usuario
-        return f'{usuario.nombre} {usuario.apellido} - {aprendiz.ficha.codigo_ficha}'
+        ficha = aprendiz.ficha.codigo_ficha if aprendiz.ficha_id else 'Sin ficha'
+        return f'{usuario.nombre} {usuario.apellido} - {ficha}'
 
     @staticmethod
     def _instructor_label(instructor):

@@ -118,9 +118,11 @@ class AprendizForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['usuario'].queryset = Usuario.objects.select_related('rol').filter(rol__nombre_rol__iexact='aprendiz').order_by('nombre', 'apellido')
         self.fields['ficha'].queryset = Ficha.objects.order_by('codigo_ficha')
+        self.fields['ficha'].required = False
+        self.fields['ficha'].empty_label = 'Sin ficha asignada'
         self.fields['ficha'].widget.attrs['data-ficha-filter'] = 'true'
         self.fields['usuario'].help_text = 'Selecciona un usuario con rol aprendiz.'
-        self.fields['ficha'].help_text = 'Asocia el aprendiz a su ficha academica.'
+        self.fields['ficha'].help_text = 'Asocia el aprendiz a su ficha academica cuando corresponda.'
 
 
 class InstructorForm(forms.ModelForm):

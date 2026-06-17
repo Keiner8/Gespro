@@ -947,7 +947,7 @@ def evaluacion_final_list(request: HttpRequest) -> HttpResponse:
             row for row in rows_by_ficha
             if query in f"{row['aprendiz'].usuario.nombre} {row['aprendiz'].usuario.apellido}".lower()
             or query in row['aprendiz'].usuario.numero_documento.lower()
-            or query in row['aprendiz'].ficha.codigo_ficha.lower()
+            or (row['aprendiz'].ficha and query in row['aprendiz'].ficha.codigo_ficha.lower())
             or query in f"{row['instructor'].usuario.nombre} {row['instructor'].usuario.apellido}".lower()
         ]
     total = len(rows_by_ficha)

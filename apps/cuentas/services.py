@@ -252,7 +252,7 @@ def clear_profile_update_code(usuario: Usuario) -> None:
 
 
 def create_profile_for_role(usuario: Usuario) -> None:
-    from apps.academico.models import Aprendiz, Ficha, Instructor
+    from apps.academico.models import Aprendiz, Instructor
 
     rol_nombre = usuario.rol.nombre_rol.lower() if usuario.rol else ''
     if rol_nombre == 'administrador':
@@ -267,6 +267,4 @@ def create_profile_for_role(usuario: Usuario) -> None:
     elif rol_nombre == 'aprendiz':
         Instructor.objects.filter(usuario=usuario).delete()
         Administrador.objects.filter(usuario=usuario).delete()
-        ficha = Ficha.objects.order_by('id').first() or ensure_default_ficha()
-        if ficha and not Aprendiz.objects.filter(usuario=usuario).exists():
-            Aprendiz.objects.create(usuario=usuario, ficha=ficha)
+        Aprendiz.objects.get_or_create(usuario=usuario, defaults={'ficha': None})
