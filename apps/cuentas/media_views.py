@@ -1,5 +1,6 @@
 """Vistas para entregar archivos multimedia privados del sistema."""
 
+import mimetypes
 from pathlib import Path
 
 from django.conf import settings
@@ -18,4 +19,5 @@ def media_file(request: HttpRequest, path: str) -> FileResponse:
     if not requested_path.is_file() or not requested_path.is_relative_to(media_root):
         raise Http404()
 
-    return FileResponse(requested_path.open('rb'))
+    content_type = mimetypes.guess_type(requested_path.name)[0] or 'application/octet-stream'
+    return FileResponse(requested_path.open('rb'), content_type=content_type)
